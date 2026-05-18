@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth *)",
+      "Bash(gh *)",
+      "Bash(npm --version)",
+      "Read(//tmp/**)",
+      "Bash(rm -rf vite-bootstrap)",
+      "Bash(npm create *)",
+      "Bash(cp *)",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(npx playwright *)",
+      "Bash(docker version *)",
+      "Bash(act -l)"
+    ]
+  }
+}
