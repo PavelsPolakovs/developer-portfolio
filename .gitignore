@@ -35,5 +35,6 @@ test-results
 # Coverage
 coverage
 
-# Claude Code credentials (do not commit)
+# Claude Code local-only files (do not commit)
 .claude/credentials.json
+.claude/settings.local.json
