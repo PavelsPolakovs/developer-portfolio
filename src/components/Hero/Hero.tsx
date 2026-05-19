@@ -94,14 +94,16 @@ export function Hero() {
 
           {/* ── Right column ── */}
           <div
-            className="flex flex-1 flex-col items-center gap-6 opacity-0 lg:items-end"
+            className="flex flex-1 items-center justify-center opacity-0 lg:justify-end"
             style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(4).style }}
           >
-            <div className="w-full max-w-md">
+            <div className="relative w-full max-w-md">
               <HeroCanvas />
-            </div>
-            <div className="flex w-full max-w-md justify-start lg:justify-start">
-              <HeroCard />
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="pointer-events-auto">
+                  <HeroCard />
+                </div>
+              </div>
             </div>
           </div>
         </div>
