@@ -17,9 +17,21 @@ const switcher = tv({
   },
   variants: {
     size: {
-      sm: { root: 'h-28 w-28', nucleus: 'h-8 w-8 text-base', electron: 'h-5 w-5' },
-      md: { root: 'h-36 w-36', nucleus: 'h-10 w-10 text-xl', electron: 'h-6 w-6' },
-      lg: { root: 'h-44 w-44', nucleus: 'h-12 w-12 text-2xl', electron: 'h-7 w-7' },
+      sm: {
+        root: 'h-[90px] w-[90px]',
+        nucleus: 'h-[26px] w-[26px] text-sm',
+        electron: 'h-3 w-3',
+      },
+      md: {
+        root: 'h-[116px] w-[116px]',
+        nucleus: 'h-8 w-8 text-base',
+        electron: 'h-4 w-4',
+      },
+      lg: {
+        root: 'h-[140px] w-[140px]',
+        nucleus: 'h-[38px] w-[38px] text-xl',
+        electron: 'h-[18px] w-[18px]',
+      },
     },
   },
   defaultVariants: {
@@ -33,27 +45,27 @@ type OrbitSpec = { radius: number; duration: number }
 
 const LAYOUT: Record<SizeKey, { box: number; orbits: Record<Theme, OrbitSpec> }> = {
   sm: {
-    box: 112,
+    box: 90,
     orbits: {
-      light: { radius: 28, duration: 14 },
-      dark: { radius: 40, duration: 22 },
-      nord: { radius: 52, duration: 32 },
+      light: { radius: 24, duration: 14 },
+      dark: { radius: 33, duration: 22 },
+      nord: { radius: 42, duration: 32 },
     },
   },
   md: {
-    box: 144,
+    box: 116,
     orbits: {
-      light: { radius: 36, duration: 16 },
-      dark: { radius: 52, duration: 26 },
-      nord: { radius: 68, duration: 38 },
+      light: { radius: 29, duration: 16 },
+      dark: { radius: 42, duration: 26 },
+      nord: { radius: 54, duration: 38 },
     },
   },
   lg: {
-    box: 176,
+    box: 140,
     orbits: {
-      light: { radius: 44, duration: 18 },
-      dark: { radius: 62, duration: 30 },
-      nord: { radius: 80, duration: 44 },
+      light: { radius: 35, duration: 18 },
+      dark: { radius: 50, duration: 30 },
+      nord: { radius: 64, duration: 44 },
     },
   },
 }
