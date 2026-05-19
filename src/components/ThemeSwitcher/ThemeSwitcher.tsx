@@ -8,17 +8,18 @@ const switcher = tv({
     ringSvg: 'pointer-events-none absolute inset-0 h-full w-full',
     ringTrack: 'fill-none stroke-muted/70',
     ringTrackActive: 'fill-none stroke-accent',
+    nucleus:
+      'pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid place-items-center rounded-full bg-surface ring-1 ring-border shadow-md',
     orbitTrack: 'pointer-events-none absolute inset-0',
     electron:
-      'pointer-events-auto absolute left-1/2 top-1/2 grid place-items-center rounded-full bg-surface ring-1 ring-border text-fg shadow-sm transition-[box-shadow,background-color,color] duration-200 hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
-    electronActive: 'bg-accent text-accent-fg ring-accent animate-[var(--animate-electron-pulse)]',
-    glyph: 'block leading-none',
+      'pointer-events-auto absolute left-1/2 top-1/2 rounded-full ring-1 ring-black/10 shadow-md transition-[box-shadow] duration-200 hover:ring-2 hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
+    electronActive: 'ring-2 ring-accent animate-[var(--animate-electron-pulse)]',
   },
   variants: {
     size: {
-      sm: { root: 'h-28 w-28', electron: 'h-5 w-5 text-[10px]' },
-      md: { root: 'h-36 w-36', electron: 'h-6 w-6 text-xs' },
-      lg: { root: 'h-44 w-44', electron: 'h-7 w-7 text-sm' },
+      sm: { root: 'h-28 w-28', nucleus: 'h-8 w-8 text-base', electron: 'h-5 w-5' },
+      md: { root: 'h-36 w-36', nucleus: 'h-10 w-10 text-xl', electron: 'h-6 w-6' },
+      lg: { root: 'h-44 w-44', nucleus: 'h-12 w-12 text-2xl', electron: 'h-7 w-7' },
     },
   },
   defaultVariants: {
@@ -34,27 +35,38 @@ const LAYOUT: Record<SizeKey, { box: number; orbits: Record<Theme, OrbitSpec> }>
   sm: {
     box: 112,
     orbits: {
-      light: { radius: 26, duration: 14 },
-      dark: { radius: 38, duration: 22 },
-      nord: { radius: 50, duration: 32 },
+      light: { radius: 28, duration: 14 },
+      dark: { radius: 40, duration: 22 },
+      nord: { radius: 52, duration: 32 },
     },
   },
   md: {
     box: 144,
     orbits: {
-      light: { radius: 32, duration: 16 },
-      dark: { radius: 48, duration: 26 },
-      nord: { radius: 64, duration: 38 },
+      light: { radius: 36, duration: 16 },
+      dark: { radius: 52, duration: 26 },
+      nord: { radius: 68, duration: 38 },
     },
   },
   lg: {
     box: 176,
     orbits: {
-      light: { radius: 40, duration: 18 },
-      dark: { radius: 60, duration: 30 },
+      light: { radius: 44, duration: 18 },
+      dark: { radius: 62, duration: 30 },
       nord: { radius: 80, duration: 44 },
     },
   },
+}
+
+const BALL: Record<Theme, { primary: string; highlight: string; shadow: string }> = {
+  light: { primary: '#ecb04a', highlight: '#fceaba', shadow: '#a8651a' },
+  dark: { primary: '#6e76a8', highlight: '#c7c3e0', shadow: '#3a3f70' },
+  nord: { primary: '#88c0d0', highlight: '#dfeef4', shadow: '#4a7585' },
+}
+
+function ballBackground(t: Theme) {
+  const { primary, highlight, shadow } = BALL[t]
+  return `radial-gradient(circle at 30% 28%, ${highlight} 0%, ${primary} 55%, ${shadow} 100%)`
 }
 
 export type ThemeSwitcherProps = {
@@ -93,6 +105,12 @@ export function ThemeSwitcher({ size = 'md', className }: ThemeSwitcherProps) {
         })}
       </svg>
 
+      <div className={styles.nucleus()} aria-live="polite" aria-label={`${THEME_META[theme].label} theme`}>
+        <span aria-hidden="true" className="leading-none">
+          {THEME_META[theme].symbol}
+        </span>
+      </div>
+
       {THEMES.map((t) => {
         const { radius, duration } = orbits[t]
         const active = t === theme
@@ -114,16 +132,9 @@ export function ThemeSwitcher({ size = 'md', className }: ThemeSwitcherProps) {
               })}
               style={{
                 transform: `translate(-50%, -50%) translateY(-${radius}px)`,
+                background: ballBackground(t),
               }}
-            >
-              <span
-                className={styles.glyph()}
-                style={{ animation: `orbit-counter ${duration}s linear infinite` }}
-                aria-hidden="true"
-              >
-                {THEME_META[t].symbol}
-              </span>
-            </button>
+            />
           </div>
         )
       })}
