@@ -5,11 +5,12 @@ import { THEMES, THEME_META, type Theme } from '../../theme/themes'
 const switcher = tv({
   slots: {
     root: 'relative inline-grid place-items-center text-fg select-none',
-    ringSvg: 'absolute inset-0 h-full w-full',
-    ringTrack: 'fill-none stroke-border opacity-70',
-    orbitTrack: 'absolute inset-0',
+    ringSvg: 'pointer-events-none absolute inset-0 h-full w-full',
+    ringTrack: 'fill-none stroke-muted/70',
+    ringTrackActive: 'fill-none stroke-accent',
+    orbitTrack: 'pointer-events-none absolute inset-0',
     electron:
-      'absolute left-1/2 top-1/2 grid place-items-center rounded-full bg-surface ring-1 ring-border text-fg shadow-sm transition-[box-shadow,background-color,color] duration-200 hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
+      'pointer-events-auto absolute left-1/2 top-1/2 grid place-items-center rounded-full bg-surface ring-1 ring-border text-fg shadow-sm transition-[box-shadow,background-color,color] duration-200 hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
     electronActive: 'bg-accent text-accent-fg ring-accent animate-[var(--animate-electron-pulse)]',
     glyph: 'block leading-none',
   },
@@ -75,17 +76,21 @@ export function ThemeSwitcher({ size = 'md', className }: ThemeSwitcherProps) {
         aria-hidden="true"
         focusable="false"
       >
-        {THEMES.map((t) => (
-          <circle
-            key={t}
-            className={styles.ringTrack()}
-            cx={center}
-            cy={center}
-            r={orbits[t].radius}
-            strokeWidth={1}
-            strokeDasharray="2 5"
-          />
-        ))}
+        {THEMES.map((t) => {
+          const active = t === theme
+          return (
+            <circle
+              key={t}
+              className={active ? styles.ringTrackActive() : styles.ringTrack()}
+              cx={center}
+              cy={center}
+              r={orbits[t].radius}
+              strokeWidth={active ? 2.5 : 1.5}
+              strokeDasharray={active ? undefined : '3 4'}
+              strokeLinecap="round"
+            />
+          )
+        })}
       </svg>
 
       {THEMES.map((t) => {
