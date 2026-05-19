@@ -86,3 +86,12 @@
       0 0 22px 6px color-mix(in oklab, var(--accent) 55%, transparent);
   }
 }
+
+@keyframes orbit-glow-travel {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
