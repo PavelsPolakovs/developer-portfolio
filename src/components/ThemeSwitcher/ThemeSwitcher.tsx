@@ -4,20 +4,24 @@ import { THEMES, THEME_META, type Theme } from '../../theme/themes'
 
 const switcher = tv({
   slots: {
-    root: 'group relative inline-grid place-items-center text-fg select-none',
+    root: 'relative inline-grid place-items-center text-fg select-none',
     ringSvg: 'pointer-events-none absolute inset-0 h-full w-full',
     ringTrack: 'fill-none stroke-muted/70',
     ringTrackActive: 'fill-none stroke-accent',
-    ringGlow: 'fill-none stroke-accent group-hover:[animation-play-state:paused]',
     nucleus:
       'pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid place-items-center rounded-full bg-surface ring-1 ring-border shadow-md',
-    orbitTrack: 'pointer-events-none absolute inset-0 group-hover:[animation-play-state:paused]',
+    orbitTrack: 'pointer-events-none absolute inset-0',
     electron:
       'pointer-events-auto absolute left-1/2 top-1/2 rounded-full ring-1 ring-black/10 shadow-md transition-[box-shadow] duration-200 hover:ring-2 hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
     electronActive: 'ring-2 ring-accent animate-[var(--animate-electron-pulse)]',
   },
   variants: {
     size: {
+      xs: {
+        root: 'h-[56px] w-[56px]',
+        nucleus: 'h-[18px] w-[18px] text-[10px]',
+        electron: 'h-2 w-2',
+      },
       sm: {
         root: 'h-[90px] w-[90px]',
         nucleus: 'h-[26px] w-[26px] text-sm',
@@ -45,6 +49,14 @@ type SizeKey = NonNullable<VariantProps<typeof switcher>['size']>
 type OrbitSpec = { radius: number; duration: number }
 
 const LAYOUT: Record<SizeKey, { box: number; orbits: Record<Theme, OrbitSpec> }> = {
+  xs: {
+    box: 56,
+    orbits: {
+      light: { radius: 14, duration: 12 },
+      dark: { radius: 20, duration: 18 },
+      nord: { radius: 26, duration: 26 },
+    },
+  },
   sm: {
     box: 90,
     orbits: {
@@ -113,26 +125,6 @@ export function ThemeSwitcher({ size = 'md', className }: ThemeSwitcherProps) {
               strokeWidth={active ? 2.5 : 1.5}
               strokeDasharray={active ? undefined : '3 4'}
               strokeLinecap="round"
-            />
-          )
-        })}
-        {THEMES.map((t) => {
-          if (t !== theme) return null
-          return (
-            <circle
-              key={`glow-${t}`}
-              className={styles.ringGlow()}
-              cx={center}
-              cy={center}
-              r={orbits[t].radius}
-              strokeWidth={3.5}
-              strokeLinecap="round"
-              pathLength={1000}
-              strokeDasharray="120 880"
-              style={{
-                animation: `orbit-glow-travel ${orbits[t].duration / 2}s linear infinite`,
-                filter: 'drop-shadow(0 0 6px var(--color-accent))',
-              }}
             />
           )
         })}

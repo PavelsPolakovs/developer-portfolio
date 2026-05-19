@@ -11,7 +11,7 @@ const meta = {
   argTypes: {
     size: {
       control: { type: 'inline-radio' },
-      options: ['sm', 'md', 'lg'],
+      options: ['xs', 'sm', 'md', 'lg'],
     },
   },
 } satisfies Meta<typeof ThemeSwitcher>
@@ -35,7 +35,7 @@ export const AllSizes: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex items-end gap-8">
-      {(['sm', 'md', 'lg'] as const).map((size) => (
+      {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex flex-col items-center gap-2">
           <ThemeSwitcher size={size} />
           <span className="text-muted text-xs tracking-wide uppercase">{size}</span>

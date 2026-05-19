@@ -30,11 +30,11 @@ const header = tv({
     scrolled: {
       true: {
         root: 'bg-bg/80 shadow-md backdrop-blur-md',
-        inner: 'h-14',
+        inner: 'h-16',
       },
       false: {
         root: 'bg-transparent',
-        inner: 'h-20',
+        inner: 'h-24',
       },
     },
   },
@@ -173,7 +173,7 @@ export function Header({
           </nav>
 
           <div className={h.rightCluster()}>
-            <ThemeSwitcher size="sm" />
+            <ThemeSwitcher size="xs" />
           </div>
         </div>
       </header>
