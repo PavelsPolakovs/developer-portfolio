@@ -7,7 +7,9 @@ test.describe('Theme switcher', () => {
     const html = page.locator('html')
     await expect(html).toHaveClass(/theme-(light|dark|nord)/)
 
-    await page.getByRole('button', { name: /Nord theme/i }).click()
+    // Electrons orbit continuously, so the click target never settles.
+    // We're testing the handler, not pointer accuracy — bypass stability checks.
+    await page.getByRole('button', { name: /Nord theme/i }).click({ force: true })
     await expect(html).toHaveClass(/theme-nord/)
     await expect(page.getByRole('button', { name: /Nord theme/i })).toHaveAttribute(
       'aria-pressed',
@@ -17,7 +19,7 @@ test.describe('Theme switcher', () => {
     await page.reload()
     await expect(page.locator('html')).toHaveClass(/theme-nord/)
 
-    await page.getByRole('button', { name: /Light theme/i }).click()
+    await page.getByRole('button', { name: /Light theme/i }).click({ force: true })
     await expect(page.locator('html')).toHaveClass(/theme-light/)
   })
 })
