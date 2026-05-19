@@ -126,6 +126,7 @@ export function Hero() {
             style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(4).style }}
           >
             <div
+              data-testid="animation-wrapper"
               className="relative w-full max-w-md"
               onMouseEnter={showOverlay}
               onMouseLeave={hideOverlay}
@@ -134,6 +135,7 @@ export function Hero() {
               <HeroCanvas overlayVisible={overlayVisible} />
               {/* HeroCard fades out when overlay is active */}
               <div
+                data-testid="hero-card-container"
                 className={[
                   'pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-200',
                   overlayVisible ? 'opacity-0' : 'opacity-100',
