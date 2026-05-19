@@ -28,7 +28,7 @@ function MockSections() {
 }
 
 const meta = {
-  title: 'Components/Header',
+  title: 'Components/Header/Header',
   component: Header,
   parameters: {
     layout: 'fullscreen',
@@ -55,9 +55,21 @@ export const CustomBrand: Story = {
   },
 }
 
+export const Scrolled: Story = {
+  play: async () => {
+    window.scrollTo(0, 400)
+  },
+}
+
+export const MobileLayout: Story = {
+  globals: {
+    viewport: { value: 'mobile1' },
+  },
+}
+
 export const MobileMenuOpen: Story = {
-  parameters: {
-    viewport: { defaultViewport: 'mobile1' },
+  globals: {
+    viewport: { value: 'mobile1' },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
