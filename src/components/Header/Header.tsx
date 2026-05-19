@@ -24,7 +24,7 @@ const header = tv({
     hamburger:
       'relative inline-grid h-10 w-10 place-items-center rounded-md text-fg transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden',
     burgerBar:
-      'absolute left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-current transition-all duration-300',
+      'absolute left-1/2 h-[3px] w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current transition-all duration-300',
   },
   variants: {
     scrolled: {
@@ -141,7 +141,7 @@ export function Header({
               <span
                 aria-hidden="true"
                 className={h.burgerBar({
-                  class: open ? 'top-1/2 -rotate-45' : 'top-[24px]',
+                  class: open ? 'top-1/2 -rotate-45' : 'top-[26px]',
                 })}
               />
             </button>
