@@ -117,7 +117,11 @@ export function ThemeSwitcher({ size = 'md', className }: ThemeSwitcherProps) {
         })}
       </svg>
 
-      <div className={styles.nucleus()} aria-live="polite" aria-label={`${THEME_META[theme].label} theme`}>
+      <div
+        className={styles.nucleus()}
+        aria-live="polite"
+        aria-label={`${THEME_META[theme].label} theme`}
+      >
         <span aria-hidden="true" className="leading-none">
           {THEME_META[theme].symbol}
         </span>
