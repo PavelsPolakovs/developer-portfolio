@@ -1,1 +1,88 @@
 @import 'tailwindcss';
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --animate-electron-pulse: electron-pulse 2.4s ease-in-out infinite;
+}
+
+@layer base {
+  :root,
+  .theme-light {
+    --bg: #f6efe2;
+    --surface: #fbf6ec;
+    --fg: #3a2c22;
+    --muted: #8a7563;
+    --accent: #c0683d;
+    --accent-fg: #fbf6ec;
+    --border: #e4d4bd;
+    --ring: #c0683d;
+  }
+
+  .theme-dark {
+    --bg: #161a18;
+    --surface: #1f2421;
+    --fg: #dbe2dc;
+    --muted: #7c8a82;
+    --accent: #5cb88a;
+    --accent-fg: #0d1311;
+    --border: #2a312d;
+    --ring: #5cb88a;
+  }
+
+  .theme-nord {
+    --bg: #2e3440;
+    --surface: #3b4252;
+    --fg: #eceff4;
+    --muted: #d8dee9;
+    --accent: #88c0d0;
+    --accent-fg: #2e3440;
+    --border: #434c5e;
+    --ring: #88c0d0;
+  }
+
+  html,
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-counter {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes electron-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 color-mix(in oklab, var(--accent) 60%, transparent),
+      0 0 12px 2px color-mix(in oklab, var(--accent) 35%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px color-mix(in oklab, var(--accent) 0%, transparent),
+      0 0 22px 6px color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+}
