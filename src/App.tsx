@@ -1,4 +1,5 @@
 import { Header } from './components/Header'
+import { Hero } from './components/Hero'
 
 const SKILLS = [
   'TypeScript',
@@ -31,21 +32,7 @@ function App() {
     <>
       <Header />
       <main className="bg-bg text-fg">
-        <section
-          id="hero"
-          className="relative flex min-h-svh items-center justify-center px-6 pt-24"
-        >
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-muted text-sm tracking-[0.2em] uppercase">Developer Portfolio</p>
-            <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-6xl">
-              Lex Polaris builds calm, fast web products.
-            </h1>
-            <p className="text-muted mt-6 text-lg">
-              Full-stack engineer focused on developer tooling, design systems and the small details
-              that make software feel inevitable.
-            </p>
-          </div>
-        </section>
+        <Hero />
 
         <section id="about" className="border-border bg-surface/40 border-t px-6 py-24 sm:py-32">
           <div className="mx-auto max-w-3xl">

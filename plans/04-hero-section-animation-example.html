@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Animation — Final</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d1117;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 48px 32px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+
+  .final-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4ade80;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    padding: 5px 14px;
+    border-radius: 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .final-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .container {
+    position: relative;
+    width: 400px;
+    height: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #1e2a3a;
+    box-shadow:
+      0 0 0 1px rgba(74,222,128,0.05),
+      0 24px 64px rgba(0,0,0,0.5);
+    z-index: 1;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .dim-label {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(74,222,128,0.25);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="final-badge">✦ Финальная версия · Hero Animation</div>
+
+<div class="container">
+  <canvas id="c"></canvas>
+  <div class="dim-label">4:3 · 400×300</div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── PARTICLES (network dots) ───
+const pts = Array.from({ length: 40 }, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  vx: (Math.random() - 0.5) * 0.8,
+  vy: (Math.random() - 0.5) * 0.8,
+  r: Math.random() * 1.6 + 0.8,
+  flash: 0,
+}));
+
+// ─── BURST PARTICLES ───
+let bursts = [];
+
+function spawnBurst(x, y) {
+  const count = 6 + Math.floor(Math.random() * 5);
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.6;
+    const speed = 0.8 + Math.random() * 2.2;
+    bursts.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1.0,
+      decay: 0.018 + Math.random() * 0.014,
+      r: 0.5 + Math.random() * 0.7,
+    });
+  }
+}
+
+// ─── WAVES (3, left → right) ───
+const waves = [
+  { speed: 0.3,  amp: 28, freq: 0.018, hue: 145, alpha: 0.35, width: 2.0, offset: -60 },
+  { speed: 1.4,  amp: 18, freq: 0.027, hue: 162, alpha: 0.22, width: 1.5, offset: 0   },
+  { speed: 0.7,  amp: 32, freq: 0.012, hue: 182, alpha: 0.15, width: 1.0, offset: 60  },
+];
+
+const hitCooldown = pts.map(() => waves.map(() => 0));
+
+let t = 0;
+
+function getWaveY(w, x) {
+  return canvas.height / 2 + w.offset + Math.sin(x * w.freq + t * w.speed) * w.amp;
+}
+
+function draw() {
+  requestAnimationFrame(draw);
+
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  t += 0.016;
+
+  // ── WAVES ──
+  waves.forEach(w => {
+    ctx.save();
+    ctx.filter = 'blur(4px)';
+    ctx.beginPath();
+    for (let n = 0; n <= canvas.width; n++) {
+      const y = getWaveY(w, n);
+      n === 0 ? ctx.moveTo(n, y) : ctx.lineTo(n, y);
+    }
+    ctx.strokeStyle = `hsla(${w.hue}, 75%, 58%, ${w.alpha * 0.3})`;
+    ctx.lineWidth = w.width * 2;
+    ctx.stroke();
+    ctx.restore();
+
+    const g = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    g.addColorStop(0,    `hsla(${w.hue}, 75%, 58%, 0)`);
+    g.addColorStop(0.15, `hsla(${w.hue}, 75%, 58%, ${w.alpha})`);
+    g.addColorStop(0.85, `hsla(${w.hue + 18}, 68%, 54%, ${w.alpha})`);
+    g.addColorStop(1,    `hsla(${w.hue + 18}, 68%, 54%, 0)`);
+
+    ctx.beginPath();
+    for (let n = 0; n <= canvas.width; n++) {
+      const y = getWaveY(w, n);
+      n === 0 ? ctx.moveTo(n, y) : ctx.lineTo(n, y);
+    }
+    ctx.strokeStyle = g;
+    ctx.lineWidth = w.width;
+    ctx.stroke();
+  });
+
+  // ── NETWORK LINES ──
+  for (let i = 0; i < pts.length; i++) {
+    for (let j = i + 1; j < pts.length; j++) {
+      const d = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
+      if (d < 100) {
+        ctx.beginPath();
+        ctx.moveTo(pts[i].x, pts[i].y);
+        ctx.lineTo(pts[j].x, pts[j].y);
+        ctx.strokeStyle = `rgba(74,222,128,${(1 - d / 100) * 0.2})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // ── NETWORK DOTS + WAVE HIT DETECTION ──
+  pts.forEach((p, pi) => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+    waves.forEach((w, wi) => {
+      if (hitCooldown[pi][wi] > 0) { hitCooldown[pi][wi]--; return; }
+      const wy = getWaveY(w, p.x);
+      if (Math.abs(p.y - wy) < w.width + 4) {
+        p.flash = 1.0;
+        spawnBurst(p.x, p.y);
+        hitCooldown[pi][wi] = 50;
+      }
+    });
+
+    if (p.flash > 0) p.flash = Math.max(0, p.flash - 0.04);
+
+    if (p.flash > 0) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r + 5 + p.flash * 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(180,255,210,${p.flash * 0.25})`;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r + 3, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(74,222,128,0.1)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r + p.flash * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = p.flash > 0 ? `rgba(220,255,235,${0.7 + p.flash * 0.3})` : 'rgba(180,255,210,0.9)';
+    ctx.fill();
+  });
+
+  // ── BURST PARTICLES ──
+  bursts = bursts.filter(b => b.life > 0);
+  bursts.forEach(b => {
+    b.x += b.vx; b.y += b.vy;
+    b.vx *= 0.97; b.vy *= 0.97;
+    b.life -= b.decay;
+
+    const alpha = Math.max(0, b.life);
+
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r + 1, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(74,222,128,${alpha * 0.15})`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,255,220,${alpha})`;
+    ctx.fill();
+  });
+}
+
+draw();
+</script>
+</body>
+</html>
