@@ -4,12 +4,23 @@ import App from './App'
 import { ThemeProvider } from './theme'
 
 describe('App', () => {
-  it('renders heading', () => {
+  it('renders hero heading', () => {
     render(
       <ThemeProvider initialTheme="light">
         <App />
       </ThemeProvider>,
     )
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Developer Portfolio')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Lex Polaris/i)
+  })
+
+  it('renders the four section landmarks', () => {
+    render(
+      <ThemeProvider initialTheme="light">
+        <App />
+      </ThemeProvider>,
+    )
+    for (const id of ['hero', 'about', 'skills', 'projects']) {
+      expect(document.getElementById(id)).not.toBeNull()
+    }
   })
 })

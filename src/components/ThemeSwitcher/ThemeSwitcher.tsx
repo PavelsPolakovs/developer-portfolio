@@ -17,6 +17,11 @@ const switcher = tv({
   },
   variants: {
     size: {
+      xs: {
+        root: 'h-[56px] w-[56px]',
+        nucleus: 'h-[18px] w-[18px] text-[10px]',
+        electron: 'h-2 w-2',
+      },
       sm: {
         root: 'h-[90px] w-[90px]',
         nucleus: 'h-[26px] w-[26px] text-sm',
@@ -44,6 +49,14 @@ type SizeKey = NonNullable<VariantProps<typeof switcher>['size']>
 type OrbitSpec = { radius: number; duration: number }
 
 const LAYOUT: Record<SizeKey, { box: number; orbits: Record<Theme, OrbitSpec> }> = {
+  xs: {
+    box: 56,
+    orbits: {
+      light: { radius: 14, duration: 12 },
+      dark: { radius: 20, duration: 18 },
+      nord: { radius: 26, duration: 26 },
+    },
+  },
   sm: {
     box: 90,
     orbits: {

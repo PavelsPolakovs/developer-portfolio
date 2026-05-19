@@ -1,4 +1,5 @@
 import type { Decorator, Preview } from '@storybook/react-vite'
+import { INITIAL_VIEWPORTS } from 'storybook/viewport'
 import '../src/index.css'
 import { THEMES, THEME_META, type Theme } from '../src/theme/themes'
 import ThemedFrame from './ThemedFrame'
@@ -26,6 +27,10 @@ const preview: Preview = {
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: 'todo',
+    },
+
+    viewport: {
+      options: INITIAL_VIEWPORTS,
     },
   },
   globalTypes: {
