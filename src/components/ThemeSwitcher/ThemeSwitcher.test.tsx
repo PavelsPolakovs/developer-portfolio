@@ -46,4 +46,25 @@ describe('ThemeSwitcher', () => {
       'true',
     )
   })
+
+  it('activates an electron with the keyboard (Enter)', async () => {
+    const user = userEvent.setup()
+    renderWithProvider('light')
+    const darkBtn = screen.getByRole('button', { name: /dark theme/i })
+    darkBtn.focus()
+    expect(darkBtn).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(document.documentElement.classList.contains('theme-dark')).toBe(true)
+    expect(darkBtn).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('keeps state stable when clicking the already-active electron', async () => {
+    const user = userEvent.setup()
+    renderWithProvider('nord')
+    const nordBtn = screen.getByRole('button', { name: /nord theme/i })
+    expect(nordBtn).toHaveAttribute('aria-pressed', 'true')
+    await user.click(nordBtn)
+    expect(nordBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(document.documentElement.classList.contains('theme-nord')).toBe(true)
+  })
 })

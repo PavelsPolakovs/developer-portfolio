@@ -71,4 +71,14 @@ describe('ThemeProvider', () => {
     )
     expect(screen.getByTestId('current')).toHaveTextContent('nord')
   })
+
+  it('falls back to the default theme when localStorage has a garbage value', () => {
+    window.localStorage.setItem(STORAGE_KEY, 'not-a-real-theme')
+    render(
+      <ThemeProvider>
+        <Probe />
+      </ThemeProvider>,
+    )
+    expect(screen.getByTestId('current')).toHaveTextContent('light')
+  })
 })
