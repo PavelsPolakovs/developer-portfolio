@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { HeroCanvas } from './HeroCanvas'
 import { HeroCard } from './HeroCard'
 import { TechTicker } from './TechTicker'
@@ -14,6 +15,33 @@ function Avatar() {
 const DELAY = (n: number) => ({ style: { animationDelay: `${n * 80}ms` } })
 
 export function Hero() {
+  const [overlayVisible, setOverlayVisible] = useState(false)
+  const isTouchRef = useRef(false)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    isTouchRef.current =
+      typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    }
+  }, [])
+
+  const showOverlay = useCallback(() => {
+    if (!isTouchRef.current) setOverlayVisible(true)
+  }, [])
+
+  const hideOverlay = useCallback(() => {
+    if (!isTouchRef.current) setOverlayVisible(false)
+  }, [])
+
+  const handleTap = useCallback(() => {
+    if (!isTouchRef.current) return
+    setOverlayVisible(true)
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    hideTimerRef.current = setTimeout(() => setOverlayVisible(false), 5000)
+  }, [])
+
   return (
     <section id="hero" className="border-border relative overflow-hidden border-b">
       {/* background grid */}
@@ -97,12 +125,21 @@ export function Hero() {
             className="flex flex-1 items-center justify-center opacity-0 lg:justify-end"
             style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(4).style }}
           >
-            <div className="relative w-full max-w-md">
-              <HeroCanvas />
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="pointer-events-auto">
-                  <HeroCard />
-                </div>
+            <div
+              className="relative w-full max-w-md"
+              onMouseEnter={showOverlay}
+              onMouseLeave={hideOverlay}
+              onTouchStart={handleTap}
+            >
+              <HeroCanvas overlayVisible={overlayVisible} />
+              {/* HeroCard fades out when overlay is active */}
+              <div
+                className={[
+                  'pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-200',
+                  overlayVisible ? 'opacity-0' : 'opacity-100',
+                ].join(' ')}
+              >
+                <HeroCard />
               </div>
             </div>
           </div>

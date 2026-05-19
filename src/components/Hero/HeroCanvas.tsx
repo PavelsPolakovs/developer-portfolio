@@ -36,18 +36,14 @@ const WAVES: Wave[] = [
   { speed: 0.7, amp: 32, freq: 0.012, hue: 182, alpha: 0.15, width: 1.0, offset: 60 },
 ]
 
-export function HeroCanvas() {
+interface HeroCanvasProps {
+  overlayVisible: boolean
+}
+
+export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
-  const [overlayVisible, setOverlayVisible] = useState(false)
   const [copied, setCopied] = useState(false)
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isTouchRef = useRef(false)
-
-  useEffect(() => {
-    isTouchRef.current =
-      typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches
-  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -229,27 +225,6 @@ export function HeroCanvas() {
     }
   }, [])
 
-  const showOverlay = useCallback(() => {
-    setOverlayVisible(true)
-  }, [])
-
-  const hideOverlay = useCallback(() => {
-    setOverlayVisible(false)
-  }, [])
-
-  const handleTap = useCallback(() => {
-    if (!isTouchRef.current) return
-    setOverlayVisible(true)
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
-    hideTimerRef.current = setTimeout(() => setOverlayVisible(false), 5000)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
-    }
-  }, [])
-
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(ANIMATION_CODE).then(() => {
       setCopied(true)
@@ -258,25 +233,20 @@ export function HeroCanvas() {
   }, [])
 
   return (
-    <div
-      className="border-border relative aspect-[4/3] max-h-[300px] w-full overflow-hidden rounded-2xl border shadow-2xl"
-      onMouseEnter={showOverlay}
-      onMouseLeave={hideOverlay}
-      onTouchStart={handleTap}
-    >
+    <div className="border-border relative aspect-[4/3] max-h-[300px] w-full overflow-hidden rounded-2xl border shadow-2xl">
       <canvas ref={canvasRef} className="block h-full w-full" />
 
-      {/* overlay */}
+      {/* overlay with copy button — controlled by parent */}
       <div
         className={[
           'absolute inset-0 flex items-center justify-center transition-opacity duration-200',
-          'bg-black/50 backdrop-blur-[2px]',
+          'bg-black/40 backdrop-blur-[2px]',
           overlayVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
         ].join(' ')}
       >
         <button
           onClick={handleCopy}
-          className="border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors active:scale-95"
+          className="bg-surface text-fg border-border hover:bg-accent hover:text-accent-fg hover:border-accent flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium shadow-sm transition-colors active:scale-95"
         >
           {copied ? (
             <>
