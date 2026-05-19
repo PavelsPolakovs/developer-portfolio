@@ -48,4 +48,33 @@ test.describe('Header', () => {
     await expect(burger).toHaveAttribute('aria-expanded', 'false')
     await expect(page.locator('#about')).toBeInViewport()
   })
+
+  test('active nav link follows the scrolled section', async ({ page }) => {
+    await page.goto('/')
+    const primary = page.getByRole('navigation', { name: 'Primary' })
+    await expect(primary.getByRole('link', { name: 'Hero' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    await page.evaluate(() => document.getElementById('skills')?.scrollIntoView())
+    await expect(primary.getByRole('link', { name: 'Skills' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    await expect(primary.getByRole('link', { name: 'Hero' })).not.toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+  })
+
+  test('Escape closes the mobile drawer', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+
+    const burger = page.getByRole('button', { name: /menu/i })
+    await burger.click()
+    await expect(burger).toHaveAttribute('aria-expanded', 'true')
+    await page.keyboard.press('Escape')
+    await expect(burger).toHaveAttribute('aria-expanded', 'false')
+  })
 })

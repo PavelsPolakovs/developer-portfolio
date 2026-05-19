@@ -1,9 +1,13 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Header } from './Header'
 import { SECTIONS } from './sections'
 import { ThemeProvider } from '../../theme/ThemeProvider'
+
+function setScrollY(value: number) {
+  Object.defineProperty(window, 'scrollY', { value, writable: true, configurable: true })
+}
 
 function renderWithFixtures() {
   const utils = render(
@@ -88,5 +92,42 @@ describe('Header', () => {
     expect(document.body.style.overflow).toBe('hidden')
     await user.keyboard('{Escape}')
     expect(document.body.style.overflow).toBe('')
+  })
+
+  it('toggles data-scrolled on window scroll', () => {
+    setScrollY(0)
+    renderWithFixtures()
+    const header = document.querySelector('header')!
+    expect(header).toHaveAttribute('data-scrolled', 'false')
+
+    act(() => {
+      setScrollY(200)
+      window.dispatchEvent(new Event('scroll'))
+    })
+    expect(header).toHaveAttribute('data-scrolled', 'true')
+
+    act(() => {
+      setScrollY(0)
+      window.dispatchEvent(new Event('scroll'))
+    })
+    expect(header).toHaveAttribute('data-scrolled', 'false')
+  })
+
+  it('renders custom brandName and brandMonogram', () => {
+    render(
+      <ThemeProvider initialTheme="light">
+        <Header brandName="Aurora Studio" brandMonogram="AS" />
+      </ThemeProvider>,
+    )
+    expect(screen.getByText('Aurora Studio')).toBeInTheDocument()
+    expect(screen.getByText('AS')).toBeInTheDocument()
+  })
+
+  it('scrolls to hero when the brand link is clicked', async () => {
+    const user = userEvent.setup()
+    renderWithFixtures()
+    const brandLinks = screen.getAllByRole('link', { name: /Lex Polaris/i })
+    await user.click(brandLinks[0])
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
   })
 })

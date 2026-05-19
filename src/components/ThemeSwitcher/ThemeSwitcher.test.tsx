@@ -67,4 +67,26 @@ describe('ThemeSwitcher', () => {
     expect(nordBtn).toHaveAttribute('aria-pressed', 'true')
     expect(document.documentElement.classList.contains('theme-nord')).toBe(true)
   })
+
+  describe('size variants', () => {
+    it.each(['xs', 'sm', 'md', 'lg'] as const)('renders %s with 3 theme buttons', (size) => {
+      render(
+        <ThemeProvider initialTheme="light">
+          <ThemeSwitcher size={size} />
+        </ThemeProvider>,
+      )
+      expect(screen.getAllByRole('button')).toHaveLength(3)
+    })
+
+    it('xs root has the 56px box size class', () => {
+      render(
+        <ThemeProvider initialTheme="light">
+          <ThemeSwitcher size="xs" />
+        </ThemeProvider>,
+      )
+      const root = screen.getByRole('group', { name: /theme switcher/i })
+      expect(root.className).toMatch(/h-\[56px\]/)
+      expect(root.className).toMatch(/w-\[56px\]/)
+    })
+  })
 })
