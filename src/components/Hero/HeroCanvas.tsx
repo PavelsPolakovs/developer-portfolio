@@ -36,6 +36,14 @@ const WAVES: Wave[] = [
   { speed: 0.7, amp: 32, freq: 0.012, hue: 182, alpha: 0.15, width: 1.0, offset: 60 },
 ]
 
+function hexToRgba(hex: string, a: number): string {
+  const h = hex.replace('#', '').padEnd(6, '0')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r},${g},${b},${a})`
+}
+
 interface HeroCanvasProps {
   overlayVisible: boolean
 }
@@ -69,6 +77,17 @@ export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
     }))
 
     let bursts: BurstParticle[] = []
+
+    let themeFg = '#dbe2dc'
+    let themeAccent = '#5cb88a'
+    let themeFrame = 0
+
+    function readTheme() {
+      const cs = getComputedStyle(document.documentElement)
+      themeFg = cs.getPropertyValue('--fg').trim() || themeFg
+      themeAccent = cs.getPropertyValue('--accent').trim() || themeAccent
+    }
+    readTheme()
 
     function spawnBurst(x: number, y: number) {
       const count = 6 + Math.floor(Math.random() * 5)
@@ -105,6 +124,9 @@ export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
 
       ctx.fillStyle = getBgColor()
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      if (themeFrame % 60 === 0) readTheme()
+      themeFrame++
 
       t += 0.016
 
@@ -147,7 +169,7 @@ export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
             ctx.beginPath()
             ctx.moveTo(pts[i].x, pts[i].y)
             ctx.lineTo(pts[j].x, pts[j].y)
-            ctx.strokeStyle = `rgba(74,222,128,${(1 - d / 100) * 0.2})`
+            ctx.strokeStyle = hexToRgba(themeAccent, (1 - d / 100) * 0.2)
             ctx.lineWidth = 1
             ctx.stroke()
           }
@@ -179,19 +201,19 @@ export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
         if (p.flash > 0) {
           ctx.beginPath()
           ctx.arc(p.x, p.y, p.r + 5 + p.flash * 4, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(180,255,210,${p.flash * 0.25})`
+          ctx.fillStyle = hexToRgba(themeAccent, p.flash * 0.25)
           ctx.fill()
         }
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r + 3, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(74,222,128,0.1)'
+        ctx.fillStyle = hexToRgba(themeFg, 0.08)
         ctx.fill()
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r + p.flash * 1.5, 0, Math.PI * 2)
         ctx.fillStyle =
-          p.flash > 0 ? `rgba(220,255,235,${0.7 + p.flash * 0.3})` : 'rgba(180,255,210,0.9)'
+          p.flash > 0 ? hexToRgba(themeAccent, 0.7 + p.flash * 0.3) : hexToRgba(themeFg, 0.85)
         ctx.fill()
       })
 
@@ -207,12 +229,12 @@ export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
         const alpha = Math.max(0, b.life)
         ctx.beginPath()
         ctx.arc(b.x, b.y, b.r + 1, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(74,222,128,${alpha * 0.15})`
+        ctx.fillStyle = hexToRgba(themeAccent, alpha * 0.15)
         ctx.fill()
 
         ctx.beginPath()
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(200,255,220,${alpha})`
+        ctx.fillStyle = hexToRgba(themeFg, alpha)
         ctx.fill()
       })
     }
