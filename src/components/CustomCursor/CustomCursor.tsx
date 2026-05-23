@@ -2,12 +2,36 @@ import { useEffect, useRef, useState } from 'react'
 
 type CursorState = 'idle' | 'hover'
 
+const INTERACTIVE = 'a, button, [role="button"], input, textarea, select, label'
+// Radius used for orbit-based hit detection (matches visual orbit radius + small buffer)
+const ORBIT_HIT_R = 14
+
+function findInteractiveNearby(cx: number, cy: number): Element | null {
+  const r = ORBIT_HIT_R
+  const points: [number, number][] = [
+    [cx, cy],
+    [cx + r, cy],
+    [cx - r, cy],
+    [cx, cy + r],
+    [cx, cy - r],
+    [cx + r * 0.7, cy + r * 0.7],
+    [cx - r * 0.7, cy + r * 0.7],
+    [cx + r * 0.7, cy - r * 0.7],
+    [cx - r * 0.7, cy - r * 0.7],
+  ]
+  for (const [x, y] of points) {
+    const found = document.elementFromPoint(x, y)?.closest(INTERACTIVE)
+    if (found) return found
+  }
+  return null
+}
+
 export function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const [cursorState, setCursorState] = useState<CursorState>('idle')
   const [visible, setVisible] = useState(false)
 
-  // Add cursor-custom class to <html> to suppress the system cursor (only on fine-pointer devices)
+  // Suppress system cursor on fine-pointer devices
   useEffect(() => {
     if (!(typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches))
       return
@@ -15,7 +39,6 @@ export function CustomCursor() {
     return () => document.documentElement.classList.remove('cursor-custom')
   }, [])
 
-  // Track mouse position and interactive hover state
   useEffect(() => {
     if (!(typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches))
       return
@@ -38,6 +61,14 @@ export function CustomCursor() {
         setVisible(true)
       }
 
+      // Hover detection: check orbit-radius points, not just cursor center
+      const interactive = findInteractiveNearby(e.clientX, e.clientY)
+      const next: CursorState = interactive ? 'hover' : 'idle'
+      if (next !== currentState) {
+        currentState = next
+        setCursorState(next)
+      }
+
       if (!rafPending) {
         rafPending = true
         raf = requestAnimationFrame(() => {
@@ -45,6 +76,16 @@ export function CustomCursor() {
           if (el) el.style.transform = `translate(${pendingX - 20}px, ${pendingY - 20}px)`
         })
       }
+    }
+
+    function onClick(e: MouseEvent) {
+      // If the element at cursor center is already interactive, natural click handles it
+      const atCenter = (e.target as Element)?.closest(INTERACTIVE)
+      if (atCenter) return
+
+      // Forward click to the nearest interactive element within orbit radius
+      const nearby = findInteractiveNearby(e.clientX, e.clientY)
+      if (nearby) (nearby as HTMLElement).click()
     }
 
     function onLeave() {
@@ -61,27 +102,15 @@ export function CustomCursor() {
       }
     }
 
-    function onOver(e: MouseEvent) {
-      const target = e.target as Element
-      const isInteractive = !!target.closest(
-        'a, button, [role="button"], input, textarea, select, label',
-      )
-      const next: CursorState = isInteractive ? 'hover' : 'idle'
-      if (next !== currentState) {
-        currentState = next
-        setCursorState(next)
-      }
-    }
-
     document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseover', onOver)
+    document.addEventListener('click', onClick)
     document.documentElement.addEventListener('mouseleave', onLeave)
     document.documentElement.addEventListener('mouseenter', onEnter)
 
     return () => {
       cancelAnimationFrame(raf)
       document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseover', onOver)
+      document.removeEventListener('click', onClick)
       document.documentElement.removeEventListener('mouseleave', onLeave)
       document.documentElement.removeEventListener('mouseenter', onEnter)
     }
@@ -118,9 +147,9 @@ export function CustomCursor() {
         }
       />
 
-      {/* Orbit */}
+      {/* Orbit — inset-[9px] = 22 px diameter, radius ≈ 11 px from center */}
       <div
-        className="absolute inset-[6px] rounded-full border-[1.5px]"
+        className="absolute inset-[9px] rounded-full border-[1.5px]"
         style={
           active
             ? {
