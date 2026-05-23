@@ -30,6 +30,7 @@ export function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const [cursorState, setCursorState] = useState<CursorState>('idle')
   const [visible, setVisible] = useState(false)
+  const [forceDarkTheme, setForceDarkTheme] = useState(false)
 
   // Suppress system cursor on fine-pointer devices
   useEffect(() => {
@@ -51,6 +52,7 @@ export function CustomCursor() {
     let pendingY = 0
     let isVisible = false
     let currentState: CursorState = 'idle'
+    let currentForceDark = false
 
     function onMove(e: MouseEvent) {
       pendingX = e.clientX
@@ -67,6 +69,14 @@ export function CustomCursor() {
       if (next !== currentState) {
         currentState = next
         setCursorState(next)
+      }
+
+      // Force dark palette when over a dark-background overlay
+      const atCursor = document.elementFromPoint(e.clientX, e.clientY)
+      const isDark = !!atCursor?.closest('[data-cursor-theme="dark"]')
+      if (isDark !== currentForceDark) {
+        currentForceDark = isDark
+        setForceDarkTheme(isDark)
       }
 
       if (!rafPending) {
@@ -123,7 +133,10 @@ export function CustomCursor() {
       ref={cursorRef}
       data-testid="custom-cursor"
       data-state={cursorState}
-      className="pointer-events-none fixed top-0 left-0 z-[9999] h-10 w-10"
+      className={[
+        'pointer-events-none fixed top-0 left-0 z-[9999] h-10 w-10',
+        forceDarkTheme ? 'theme-dark' : '',
+      ].join(' ')}
       style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s', willChange: 'transform' }}
     >
       {/* Pulse wave — only visible in hover state */}

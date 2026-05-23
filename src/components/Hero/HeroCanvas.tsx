@@ -260,6 +260,7 @@ export function HeroCanvas({ overlayVisible }: HeroCanvasProps) {
 
       {/* overlay with copy button — controlled by parent */}
       <div
+        data-cursor-theme="dark"
         className={[
           'absolute inset-0 flex items-center justify-center transition-opacity duration-200',
           'bg-black/40 backdrop-blur-[2px]',
