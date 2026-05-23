@@ -21,7 +21,7 @@ export function SkillsSection() {
       </motion.div>
 
       <motion.div
-        className="mt-4 h-[560px] w-full sm:h-[600px]"
+        className="mt-4 h-[900px] w-full sm:h-[600px]"
         data-testid="skills-canvas-wrapper"
         variants={fadeInUp}
       >

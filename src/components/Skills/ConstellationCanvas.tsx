@@ -2,10 +2,24 @@ import { useEffect, useRef } from 'react'
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
-const LINE_GAP = 20
-const TEXT_OFFSET = 72
-const HIT_RADIUS = 55
 const COMET_DELAY_MS = 300
+
+// ── scale helpers (computed from canvas width) ────────────────────────────────
+
+interface ScaleParams {
+  hitRadius: number
+  textOffset: number
+  lineGap: number
+}
+
+function getScaleParams(w: number): ScaleParams {
+  const mobile = w < 640
+  return {
+    hitRadius: mobile ? 44 : 55,
+    textOffset: mobile ? 52 : 72,
+    lineGap: mobile ? 17 : 20,
+  }
+}
 
 // ── data ──────────────────────────────────────────────────────────────────────
 
@@ -85,6 +99,30 @@ const SKILL_DATA = [
 ] as const
 
 type SkillId = (typeof SKILL_DATA)[number]['id']
+
+// Two-column vertical layout for narrow screens (< 640px):
+// nodes are spread into 4 rows × 2 columns so no text overlaps.
+const MOBILE_RX: Record<SkillId, number> = {
+  typescript: 0.25,
+  react: 0.75,
+  nodejs: 0.25,
+  tailwind: 0.75,
+  vite: 0.25,
+  playwright: 0.75,
+  postgres: 0.25,
+  docker: 0.75,
+}
+
+const MOBILE_RY: Record<SkillId, number> = {
+  typescript: 0.11,
+  react: 0.11,
+  nodejs: 0.35,
+  tailwind: 0.35,
+  vite: 0.6,
+  playwright: 0.6,
+  postgres: 0.85,
+  docker: 0.85,
+}
 
 const CONNECTORS: Array<{ from: SkillId; to: SkillId }> = [
   { from: 'react', to: 'typescript' },
@@ -183,11 +221,11 @@ function readTheme(): ThemeColors {
 }
 
 function getFonts(w: number) {
-  const sm = w < 640
+  const mobile = w < 640
   return {
-    title: `700 ${sm ? 17 : 22}px 'Syne', sans-serif`,
-    sub: `400 ${sm ? 9 : 10}px 'JetBrains Mono', monospace`,
-    desc: `300 ${sm ? 9 : 10}px 'JetBrains Mono', monospace`,
+    title: `700 ${mobile ? 14 : 22}px 'Syne', sans-serif`,
+    sub: `400 ${mobile ? 8 : 10}px 'JetBrains Mono', monospace`,
+    desc: `300 ${mobile ? 8 : 10}px 'JetBrains Mono', monospace`,
   }
 }
 
@@ -262,14 +300,14 @@ function ensureMeasures(ctx: CanvasRenderingContext2D, node: SkillNode, canvasW:
     node.descBright = new Array(node.desc.length).fill(0)
 }
 
-function launchComet(node: SkillNode) {
+function launchComet(node: SkillNode, textOffset: number) {
   if (!node.active || !node.titleM || !node.subM || !node.descM) return
   const allX = [...node.titleM, ...node.subM, ...node.descM].map((c) => c.x)
   const minX = Math.min(...allX) - 40
   const maxX = Math.max(...allX) + 40
   node.comet = {
     x: minX,
-    y: node.y + TEXT_OFFSET - 10,
+    y: node.y + textOffset - 10,
     xEnd: maxX,
     speed: (maxX - minX) / 55,
     tail: [],
@@ -277,15 +315,15 @@ function launchComet(node: SkillNode) {
   }
 }
 
-function updateComet(node: SkillNode) {
+function updateComet(node: SkillNode, textOffset: number, lineGap: number) {
   const comet = node.comet
   if (!comet || comet.done) return
   comet.tail.unshift({ x: comet.x, y: comet.y })
   if (comet.tail.length > 28) comet.tail.pop()
   comet.x += comet.speed
 
-  const textY = node.y + TEXT_OFFSET
-  const lineYs = [textY, textY + LINE_GAP, textY + LINE_GAP * 2]
+  const textY = node.y + textOffset
+  const lineYs = [textY, textY + lineGap, textY + lineGap * 2]
   const RADIUS = 38
 
   function illuminate(c: Comet, measures: CharM[], bright: number[]) {
@@ -317,11 +355,11 @@ function decayBrightness(node: SkillNode) {
   node.descBright = node.descBright.map((b) => (b > 0.55 ? Math.max(0.55, b - decay) : b))
 }
 
-function launchFall(node: SkillNode) {
+function launchFall(node: SkillNode, textOffset: number, lineGap: number) {
   if (!node.titleM || !node.subM || !node.descM) return
   node.falling = []
   node.isFalling = true
-  const textY = node.y + TEXT_OFFSET
+  const textY = node.y + textOffset
   const lines = [
     {
       measures: node.titleM,
@@ -334,14 +372,14 @@ function launchFall(node: SkillNode) {
       measures: node.subM,
       bright: node.subBright,
       key: 'sub' as const,
-      y: textY + LINE_GAP,
+      y: textY + lineGap,
       font: node.fonts.sub,
     },
     {
       measures: node.descM,
       bright: node.descBright,
       key: 'desc' as const,
-      y: textY + LINE_GAP * 2,
+      y: textY + lineGap * 2,
       font: node.fonts.desc,
     },
   ]
@@ -401,11 +439,17 @@ function drawFalling(ctx: CanvasRenderingContext2D, node: SkillNode, fg: [number
   })
 }
 
-function drawText(ctx: CanvasRenderingContext2D, node: SkillNode, theme: ThemeColors) {
+function drawText(
+  ctx: CanvasRenderingContext2D,
+  node: SkillNode,
+  theme: ThemeColors,
+  textOffset: number,
+  lineGap: number,
+) {
   if (!node.titleM) return
   const [fr, fg, fb] = theme.fg
   const [ar, ag, ab] = theme.accent
-  const textY = node.y + TEXT_OFFSET
+  const textY = node.y + textOffset
 
   function drawLine(measures: CharM[], bright: number[], font: string, y: number) {
     ctx.save()
@@ -426,8 +470,8 @@ function drawText(ctx: CanvasRenderingContext2D, node: SkillNode, theme: ThemeCo
   }
 
   drawLine(node.titleM, node.titleBright, node.fonts.title, textY)
-  if (node.subM) drawLine(node.subM, node.subBright, node.fonts.sub, textY + LINE_GAP)
-  if (node.descM) drawLine(node.descM, node.descBright, node.fonts.desc, textY + LINE_GAP * 2)
+  if (node.subM) drawLine(node.subM, node.subBright, node.fonts.sub, textY + lineGap)
+  if (node.descM) drawLine(node.descM, node.descBright, node.fonts.desc, textY + lineGap * 2)
 }
 
 function drawComet(
@@ -603,13 +647,15 @@ export function ConstellationCanvas() {
     const nodeById = new Map(nodes.map((n) => [n.id, n]))
     const timers: ReturnType<typeof setTimeout>[] = []
     let activeNode: SkillNode | null = null
+    let scale: ScaleParams = getScaleParams(canvas.offsetWidth)
 
     function updatePositions() {
       const w = canvas!.width
       const h = canvas!.height
+      const mobile = w < 640
       nodes.forEach((node) => {
-        node.x = node.rx * w
-        node.y = node.ry * h
+        node.x = (mobile ? MOBILE_RX[node.id] : node.rx) * w
+        node.y = (mobile ? MOBILE_RY[node.id] : node.ry) * h
         node.titleM = null // invalidate measures on resize
       })
     }
@@ -617,6 +663,7 @@ export function ConstellationCanvas() {
     function resize() {
       canvas!.width = canvas!.offsetWidth
       canvas!.height = canvas!.offsetHeight
+      scale = getScaleParams(canvas!.width)
       updatePositions()
     }
     resize()
@@ -635,7 +682,7 @@ export function ConstellationCanvas() {
       if (activeNode && activeNode !== node) {
         activeNode.active = false
         activeNode.comet = null
-        launchFall(activeNode)
+        launchFall(activeNode, scale.textOffset, scale.lineGap)
       }
       activeNode = node
       node.active = true
@@ -643,7 +690,7 @@ export function ConstellationCanvas() {
       node.pulseT = 0
       ensureMeasures(ctx!, node, canvas!.width)
       const timer = setTimeout(() => {
-        launchComet(node)
+        launchComet(node, scale.textOffset)
       }, COMET_DELAY_MS)
       timers.push(timer)
     }
@@ -652,7 +699,7 @@ export function ConstellationCanvas() {
       if (!activeNode) return
       activeNode.active = false
       activeNode.comet = null
-      launchFall(activeNode)
+      launchFall(activeNode, scale.textOffset, scale.lineGap)
       activeNode = null
     }
 
@@ -698,12 +745,12 @@ export function ConstellationCanvas() {
           : Math.min(1, node.orbitOpacity + 0.03)
 
         ensureMeasures(ctx, node, canvas.width)
-        updateComet(node)
+        updateComet(node, scale.textOffset, scale.lineGap)
         decayBrightness(node)
         updateFall(node)
         drawNode(ctx, node, theme.accent)
         drawComet(ctx, node, theme.accent)
-        drawText(ctx, node, theme)
+        drawText(ctx, node, theme, scale.textOffset, scale.lineGap)
         drawFalling(ctx, node, theme.fg)
       })
     }
@@ -714,7 +761,7 @@ export function ConstellationCanvas() {
       return nodes.find((n) => {
         const dx = mx - n.x
         const dy = my - n.y
-        return Math.sqrt(dx * dx + dy * dy) < HIT_RADIUS
+        return Math.sqrt(dx * dx + dy * dy) < scale.hitRadius
       })
     }
 
@@ -725,7 +772,7 @@ export function ConstellationCanvas() {
       nodes.forEach((n) => {
         const dx = mx - n.x
         const dy = my - n.y
-        n.hovered = Math.sqrt(dx * dx + dy * dy) < HIT_RADIUS
+        n.hovered = Math.sqrt(dx * dx + dy * dy) < scale.hitRadius
       })
       const anyHovered = nodes.some((n) => n.hovered)
       canvas!.style.cursor = anyHovered ? 'pointer' : 'default'
