@@ -65,6 +65,10 @@
     background-color: var(--color-bg);
     color: var(--color-fg);
   }
+
+  .cursor-custom * {
+    cursor: none !important;
+  }
 }
 
 @keyframes orbit {

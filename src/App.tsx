@@ -1,4 +1,5 @@
 import { AboutSection } from './components/About'
+import { CustomCursor } from './components/CustomCursor'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 
@@ -31,6 +32,7 @@ const PROJECTS = [
 function App() {
   return (
     <>
+      <CustomCursor />
       <Header />
       <main className="bg-bg text-fg">
         <Hero />
