@@ -67,6 +67,7 @@
   body {
     background-color: var(--color-bg);
     color: var(--color-fg);
+    overflow-x: hidden;
   }
 
   .cursor-custom * {
