@@ -160,7 +160,7 @@ export function AboutSection() {
         data-testid="about-section"
         className="border-border bg-surface/40 border-t px-6 py-24 sm:py-32"
       >
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           {/* Header */}
           <h2 className="text-fg text-3xl font-bold tracking-tight sm:text-4xl">About</h2>
           <p className="text-muted mt-4 max-w-2xl text-base leading-relaxed">
