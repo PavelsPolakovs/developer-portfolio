@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0c10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 80px 24px;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #374151;
+  }
+
+  /* ─── WRAPPER ─── */
+  .card-wrapper {
+    position: relative;
+    width: 300px;
+    height: 200px;
+    perspective: 1000px;
+    cursor: pointer;
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-wrapper:hover .card {
+    transform: rotateY(180deg);
+  }
+
+  /* ─── FACES ─── */
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    border: 1px solid #2a3142;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  }
+
+  /* ─── FRONT ─── */
+  .card-front {
+    background: #fff;
+  }
+
+  /* ─── BADGE inside front ─── */
+  .badge-wrap {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+  }
+
+  .badge-name {
+    position: relative;
+    background: rgba(10, 12, 16, 0.45);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    border-radius: 6px;
+    padding: 3px 9px;
+    display: inline-flex;
+    align-items: center;
+    overflow: visible;
+  }
+
+  .badge-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    color: #f0fdf4;
+    -webkit-text-stroke: 1px #14532d;
+    paint-order: stroke fill;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 2;
+  }
+
+  .badge-canvas {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* ─── BROWSER ─── */
+  .browser {
+    position: absolute;
+    inset: 0;
+  }
+
+  .browser-bar {
+    height: 24px;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 5px;
+  }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+
+  .browser-url {
+    flex: 1; height: 12px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    margin-left: 6px;
+  }
+
+  .browser-body {
+    height: calc(100% - 24px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fake-nav {
+    height: 28px;
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+  }
+
+  .fake-logo { width: 48px; height: 8px; background: #22c55e; border-radius: 3px; }
+  .fake-links { display: flex; gap: 6px; margin-left: auto; }
+  .fake-link { width: 28px; height: 7px; background: #e2e8f0; border-radius: 2px; }
+
+  .fake-content {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: linear-gradient(160deg, #f0fdf4 0%, #fff 60%);
+  }
+
+  .fake-h1 { width: 130px; height: 13px; background: #1e293b; border-radius: 3px; opacity: 0.8; }
+  .fake-h2 { width: 90px;  height: 9px;  background: #22c55e; border-radius: 3px; opacity: 0.7; }
+  .fake-p  { width: 110px; height: 7px;  background: #cbd5e1; border-radius: 2px; margin-top: 4px; }
+  .fake-p2 { width: 80px;  height: 7px;  background: #e2e8f0; border-radius: 2px; }
+  .fake-btn { width: 64px; height: 18px; background: #22c55e; border-radius: 5px; margin-top: 8px; opacity: 0.9; }
+
+  /* ─── MOBILE ─── */
+  .mobile {
+    position: absolute;
+    bottom: -28px;
+    right: 12px;
+    width: 80px;
+    height: 145px;
+    background: #fff;
+    border-radius: 13px;
+    border: 1.5px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    z-index: 5;
+  }
+
+  .mob-notch {
+    height: 12px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mob-notch-pill { width: 22px; height: 4px; background: #cbd5e1; border-radius: 2px; }
+
+  .mob-body {
+    padding: 6px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mob-bar   { height: 14px; background: #f1f5f9; border-radius: 3px; border: 1px solid #e2e8f0; }
+  .mob-hero  { height: 30px; background: linear-gradient(135deg, #dcfce7, #f0fdf4); border-radius: 4px; margin-top: 2px; }
+  .mob-line  { height: 5px; background: #e2e8f0; border-radius: 2px; }
+  .mob-short { height: 5px; width: 55%; background: #f1f5f9; border-radius: 2px; }
+
+  /* ─── BACK ─── */
+  .card-back {
+    transform: rotateY(180deg);
+    background: #0f1117;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .back-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #64748b;
+    line-height: 1.6;
+    min-height: 2.4em;
+  }
+
+  .back-desc .cursor {
+    display: inline-block;
+    width: 1px;
+    height: 0.9em;
+    background: #22c55e;
+    margin-left: 1px;
+    vertical-align: middle;
+    animation: blink 0.7s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .back-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+  }
+
+  .back-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: #22c55e;
+    background: #22c55e12;
+    border: 1px solid #22c55e30;
+    border-radius: 4px;
+    padding: 2px 7px;
+    opacity: 0;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+
+  .back-tag:nth-child(1) { transform: translateY(-120px); }
+  .back-tag:nth-child(2) { transform: translateX(160px); }
+  .back-tag:nth-child(3) { transform: translateY(120px); }
+  .back-tag:nth-child(4) { transform: translateX(-160px); }
+  .back-tag:nth-child(5) { transform: translateY(-120px); }
+
+  .back-tag.visible {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .back-link {
+    margin-top: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #22c55e;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .back-link.visible {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="label">// hover to flip</div>
+
+<div class="card-wrapper">
+  <div class="card">
+
+    <!-- FRONT -->
+    <div class="card-face card-front">
+
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <div class="browser-url"></div>
+        </div>
+        <div class="browser-body">
+          <div class="fake-nav">
+            <div class="fake-logo"></div>
+            <div class="fake-links">
+              <div class="fake-link"></div>
+              <div class="fake-link"></div>
+              <div class="fake-link"></div>
+            </div>
+          </div>
+          <div class="fake-content">
+            <div class="fake-h1"></div>
+            <div class="fake-h2"></div>
+            <div class="fake-p"></div>
+            <div class="fake-p2"></div>
+            <div class="fake-btn"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mobile">
+        <div class="mob-notch"><div class="mob-notch-pill"></div></div>
+        <div class="mob-body">
+          <div class="mob-bar"></div>
+          <div class="mob-hero"></div>
+          <div class="mob-line"></div>
+          <div class="mob-short"></div>
+          <div class="mob-line"></div>
+        </div>
+      </div>
+
+      <!-- Badge with comet -->
+      <div class="badge-wrap">
+        <div class="badge-name" id="badgeName">
+          <canvas class="badge-canvas" id="badgeCanvas"></canvas>
+          <div class="badge-text">NovaDash</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BACK -->
+    <div class="card-face card-back" id="cardBack">
+      <div class="back-desc" id="backDesc"><span class="cursor"></span></div>
+      <div class="back-tags" id="backTags">
+        <span class="back-tag">React</span>
+        <span class="back-tag">TypeScript</span>
+        <span class="back-tag">Tailwind</span>
+        <span class="back-tag">Vite</span>
+        <span class="back-tag">Recharts</span>
+      </div>
+      <a class="back-link" id="backLink" href="#">↗ GitHub</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const badge = document.getElementById('badgeName');
+  const bc    = document.getElementById('badgeCanvas');
+  const bctx  = bc.getContext('2d');
+
+  function initBadgeComet() {
+    const rect = badge.getBoundingClientRect();
+    const bW = rect.width;
+    const bH = rect.height;
+    const OFF = 6, BR = 6;
+    bc.width  = Math.round(bW) + OFF * 2 - 1;
+    bc.height = Math.round(bH) + OFF * 2;
+
+    const BTAIL = 80, BSPEED = 0.35;
+
+    function buildPerimeter() {
+      const pts = [], step = 1;
+      const x0 = OFF, y0 = OFF, x1 = OFF + bW, y1 = OFF + bH;
+      for (let x = x0+BR; x <= x1-BR; x += step) pts.push({x, y: y0});
+      for (let a = -Math.PI/2; a <= 0; a += step/BR) pts.push({x: x1-BR+Math.cos(a)*BR, y: y0+BR+Math.sin(a)*BR});
+      for (let y = y0+BR; y <= y1-BR; y += step) pts.push({x: x1, y});
+      for (let a = 0; a <= Math.PI/2; a += step/BR) pts.push({x: x1-BR+Math.cos(a)*BR, y: y1-BR+Math.sin(a)*BR});
+      for (let x = x1-BR; x >= x0+BR; x -= step) pts.push({x, y: y1});
+      for (let a = Math.PI/2; a <= Math.PI; a += step/BR) pts.push({x: x0+BR+Math.cos(a)*BR, y: y1-BR+Math.sin(a)*BR});
+      for (let y = y1-BR; y >= y0+BR; y -= step) pts.push({x: x0, y});
+      for (let a = Math.PI; a <= 3*Math.PI/2; a += step/BR) pts.push({x: x0+BR+Math.cos(a)*BR, y: y0+BR+Math.sin(a)*BR});
+      return pts;
+    }
+
+    const peri = buildPerimeter();
+    const total = peri.length;
+    let pos = 0;
+
+    function draw() {
+      bctx.clearRect(0, 0, bc.width, bc.height);
+
+      for (let i = 0; i < BTAIL; i++) {
+        const pt = peri[(Math.floor(pos) - i + total) % total];
+        const p = 1 - i / BTAIL;
+        const alpha = p * p * 0.7;
+        const size = i === 0 ? 0 : 1.0 * p * p * p;
+
+        const g = bctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, size * 2);
+        g.addColorStop(0, `rgba(34,197,94,${alpha * 0.3})`);
+        g.addColorStop(1, 'rgba(34,197,94,0)');
+        bctx.beginPath(); bctx.arc(pt.x, pt.y, size * 2, 0, Math.PI*2);
+        bctx.fillStyle = g; bctx.fill();
+
+        bctx.beginPath(); bctx.arc(pt.x, pt.y, size, 0, Math.PI*2);
+        bctx.fillStyle = `rgba(34,197,94,${alpha})`; bctx.fill();
+      }
+
+      const h = peri[Math.floor(pos) % total];
+      const hg = bctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, 6);
+      hg.addColorStop(0, 'rgba(34,197,94,0.5)');
+      hg.addColorStop(1, 'rgba(34,197,94,0)');
+      bctx.beginPath(); bctx.arc(h.x, h.y, 6, 0, Math.PI*2);
+      bctx.fillStyle = hg; bctx.fill();
+
+      bctx.beginPath(); bctx.arc(h.x, h.y, 1.8, 0, Math.PI*2);
+      bctx.fillStyle = '#fff'; bctx.fill();
+
+      pos = (pos + BSPEED) % total;
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  }
+
+  setTimeout(initBadgeComet, 100);
+
+  // ─── BACK ANIMATION ───
+  const wrapper   = document.querySelector('.card-wrapper');
+  const backDesc  = document.getElementById('backDesc');
+  const backTags  = document.querySelectorAll('.back-tag');
+  const backLink  = document.getElementById('backLink');
+
+  const FULL_TEXT = 'Аналитическая платформа для отслеживания метрик продукта в реальном времени.';
+  let typeTimer = null, tagTimers = [], isFlipped = false;
+
+  function startAnimation() {
+    if (isFlipped) return;
+    isFlipped = true;
+
+    // Reset
+    backDesc.innerHTML = '<span class="cursor"></span>';
+    backTags.forEach(t => t.classList.remove('visible'));
+    backLink.classList.remove('visible');
+
+    // Typewriter
+    let i = 0;
+    const cursor = backDesc.querySelector('.cursor');
+
+    typeTimer = setInterval(() => {
+      if (i < FULL_TEXT.length) {
+        backDesc.insertBefore(document.createTextNode(FULL_TEXT[i]), cursor);
+        i++;
+      } else {
+        clearInterval(typeTimer);
+        cursor.remove();
+
+        // Tags appear one by one
+        backTags.forEach((tag, idx) => {
+          tagTimers.push(setTimeout(() => {
+            tag.classList.add('visible');
+          }, idx * 120));
+        });
+
+        // Link appears after all tags
+        tagTimers.push(setTimeout(() => {
+          backLink.classList.add('visible');
+        }, backTags.length * 120 + 100));
+      }
+    }, 18);
+  }
+
+  function resetAnimation() {
+    isFlipped = false;
+    clearInterval(typeTimer);
+    tagTimers.forEach(t => clearTimeout(t));
+    tagTimers = [];
+    backDesc.innerHTML = '<span class="cursor"></span>';
+    backTags.forEach(t => t.classList.remove('visible'));
+    backLink.classList.remove('visible');
+  }
+
+  wrapper.addEventListener('mouseenter', () => {
+    setTimeout(startAnimation, 400); // wait for flip to complete
+  });
+
+  wrapper.addEventListener('mouseleave', resetAnimation);
+</script>
+
+</body>
+</html>

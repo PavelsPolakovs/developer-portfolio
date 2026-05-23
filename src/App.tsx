@@ -2,22 +2,8 @@ import { AboutSection } from './components/About'
 import { CustomCursor } from './components/CustomCursor'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
+import { ProjectsSection } from './components/Projects'
 import { SkillsSection } from './components/Skills'
-
-const PROJECTS = [
-  {
-    title: 'Stellar Notes',
-    blurb: 'Markdown-first knowledge base with end-to-end encryption and offline sync.',
-  },
-  {
-    title: 'Orbital UI Kit',
-    blurb: 'Open-source design system built on Tailwind v4 with light, dark and Nord themes.',
-  },
-  {
-    title: 'Aurora Metrics',
-    blurb: 'Tiny self-hosted analytics with privacy-first defaults and a 14 kB script.',
-  },
-]
 
 function App() {
   return (
@@ -31,22 +17,7 @@ function App() {
 
         <SkillsSection />
 
-        <section id="projects" className="border-border bg-surface/40 border-t px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="text-3xl font-semibold tracking-tight">Projects</h2>
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {PROJECTS.map((p) => (
-                <article
-                  key={p.title}
-                  className="bg-bg ring-border rounded-xl p-6 shadow-sm ring-1"
-                >
-                  <h3 className="text-lg font-semibold tracking-tight">{p.title}</h3>
-                  <p className="text-muted mt-2 text-sm leading-relaxed">{p.blurb}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <ProjectsSection />
 
         <footer className="border-border text-muted border-t px-6 py-8 text-center text-sm">
           © {new Date().getFullYear()} Lex Polaris — built with React, Vite and Tailwind.
