@@ -29,25 +29,6 @@
 - `make format` — Prettier write (применить форматирование)
 - `make storybook` — Storybook dev server (порт 6006)
 
-## Code style этого проекта
-
-Актуальные значения всегда берутся из конфигов (шаг 2 workflow). Типичные ограничения:
-
-**TypeScript** (`tsconfig.app.json`):
-- `noUnusedLocals` / `noUnusedParameters` — каждая переменная и параметр должны использоваться; неиспользуемые удалять, а не переименовывать в `_x`
-- `verbatimModuleSyntax` — типы импортировать через `import type { Foo }`, не `import { Foo }`
-- `erasableSyntaxOnly` — запрещены `enum` и `namespace`; использовать `const` объекты и type aliases
-- **Сужение типов в замыканиях**: TypeScript не переносит narrowing (`if (!ctx) return`) внутрь вложенных функций. Паттерн: добавить guard в начало каждой вложенной функции или переименовать переменную — `const safeCtx: CanvasRenderingContext2D = ctx` — чтобы тип был ненулевым с самого начала
-
-**Prettier** (`.prettierrc`):
-- `semi: false` — без точки с запятой
-- `singleQuote: true` — одинарные кавычки
-- `trailingComma: "all"` — trailing comma везде (функции, массивы, объекты)
-- `printWidth: 100` — максимальная ширина строки
-- После генерации кода всегда запускать `make format`, не пытаться угадать форматирование вручную
-
-**ESLint**:
-- `typescript-eslint` + `react-hooks` + `react-refresh` — стандартные правила; при ошибке lint читать сообщение, не глушить через `// eslint-disable`
 
 ## Правила
 
