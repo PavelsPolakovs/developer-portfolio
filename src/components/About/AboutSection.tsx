@@ -141,22 +141,15 @@ function Modal({ item, onClose }: ModalProps) {
 }
 
 export function AboutSection() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [activeIndex, setActiveIndex] = useState<number>(0)
   const [modalItem, setModalItem] = useState<TimelineItemData | null>(null)
 
   function handleItemClick(index: number) {
-    const item = TIMELINE_ITEMS[index]
-    if (activeIndex === index) {
-      setActiveIndex(null)
-      setModalItem(null)
-    } else {
-      setActiveIndex(index)
-      setModalItem(item)
-    }
+    setActiveIndex(index)
+    setModalItem(TIMELINE_ITEMS[index])
   }
 
   function closeModal() {
-    setActiveIndex(null)
     setModalItem(null)
   }
 
