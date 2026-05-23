@@ -7,14 +7,19 @@
 Когда пользователь даёт задачу в виде файла `plans/NN-*.md`:
 
 1. Прочитать файл плана полностью, без действий. Если рядом существует файл `plans/NN-*.html` с тем же номером — прочитать и его: он содержит эталонный пример реализации (анимация, компонент, дизайн). **Код из HTML-файла брать за основу реализации.**
-2. При неясностях — задать вопросы через `AskUserQuestion` (label + 1 строка описания, 2–4 варианта).
-3. Создать ветку `feat/NN-<slug>` или `chore/NN-<slug>` и переключиться на неё (`git checkout -b`). Имя берётся из имени файла плана. **Только после этого приступать к выполнению.**
-4. Создать `TaskCreate` по шагам плана, выполнять последовательно, обновлять статус (`in_progress` → `completed`).
-5. После каждого значимого изменения — быстрые проверки: `make lint`, `make format-check`, `make test`.
-6. По завершении всех шагов — `make ci` (агрегат: format-check → lint → test → build → e2e).
-7. Финальный смок: `make ci-act` (полный прогон `.github/workflows/ci.yml` в Docker через `act`).
-8. Показать `git status` + `git diff --stat`. **Не коммитить и не пушить.**
-9. По команде пользователя (`commit` / `PR`) — коммит, push, открыть PR через `gh pr create`.
+2. **Прочитать конфигурацию проекта перед написанием любого кода** — параллельно:
+   - `tsconfig.app.json` — флаги компилятора, особенно `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`
+   - `.prettierrc` — правила форматирования
+   - `eslint.config.*` — правила линтера
+   - Один существующий компонент того же типа (organism/atom/canvas) — для понимания паттернов
+3. При неясностях — задать вопросы через `AskUserQuestion` (label + 1 строка описания, 2–4 варианта).
+4. Создать ветку `feat/NN-<slug>` или `chore/NN-<slug>` и переключиться на неё (`git checkout -b`). Имя берётся из имени файла плана. **Только после этого приступать к выполнению.**
+5. Создать `TaskCreate` по шагам плана, выполнять последовательно, обновлять статус (`in_progress` → `completed`).
+6. После каждого значимого изменения — быстрые проверки: `make lint`, `make format-check`, `make test`.
+7. По завершении всех шагов — `make ci` (агрегат: format-check → lint → test → build → e2e).
+8. Финальный смок: `make ci-act` (полный прогон `.github/workflows/ci.yml` в Docker через `act`).
+9. Показать `git status` + `git diff --stat`. **Не коммитить и не пушить.**
+10. По команде пользователя (`commit` / `PR`) — коммит, push, открыть PR через `gh pr create`.
 
 ## Команды
 
@@ -23,6 +28,26 @@
 - `make ci-act` — то же через Docker (точная репродукция GitHub Actions)
 - `make format` — Prettier write (применить форматирование)
 - `make storybook` — Storybook dev server (порт 6006)
+
+## Code style этого проекта
+
+Актуальные значения всегда берутся из конфигов (шаг 2 workflow). Типичные ограничения:
+
+**TypeScript** (`tsconfig.app.json`):
+- `noUnusedLocals` / `noUnusedParameters` — каждая переменная и параметр должны использоваться; неиспользуемые удалять, а не переименовывать в `_x`
+- `verbatimModuleSyntax` — типы импортировать через `import type { Foo }`, не `import { Foo }`
+- `erasableSyntaxOnly` — запрещены `enum` и `namespace`; использовать `const` объекты и type aliases
+- **Сужение типов в замыканиях**: TypeScript не переносит narrowing (`if (!ctx) return`) внутрь вложенных функций. Паттерн: добавить guard в начало каждой вложенной функции или переименовать переменную — `const safeCtx: CanvasRenderingContext2D = ctx` — чтобы тип был ненулевым с самого начала
+
+**Prettier** (`.prettierrc`):
+- `semi: false` — без точки с запятой
+- `singleQuote: true` — одинарные кавычки
+- `trailingComma: "all"` — trailing comma везде (функции, массивы, объекты)
+- `printWidth: 100` — максимальная ширина строки
+- После генерации кода всегда запускать `make format`, не пытаться угадать форматирование вручную
+
+**ESLint**:
+- `typescript-eslint` + `react-hooks` + `react-refresh` — стандартные правила; при ошибке lint читать сообщение, не глушить через `// eslint-disable`
 
 ## Правила
 
