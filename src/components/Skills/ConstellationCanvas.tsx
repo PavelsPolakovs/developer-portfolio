@@ -16,8 +16,8 @@ const SKILL_DATA = [
     orbit: 'TYPESCRIPT',
     sub: 'Types · Interfaces · Generics',
     desc: 'Strict mode on every project',
-    rx: 0.12,
-    ry: 0.25,
+    rx: 0.16,
+    ry: 0.18,
   },
   {
     id: 'react',
@@ -25,8 +25,8 @@ const SKILL_DATA = [
     orbit: 'REACT',
     sub: 'UI · Components · Hooks',
     desc: 'Core of every project',
-    rx: 0.37,
-    ry: 0.25,
+    rx: 0.33,
+    ry: 0.38,
   },
   {
     id: 'nodejs',
@@ -34,8 +34,8 @@ const SKILL_DATA = [
     orbit: 'NODE.JS',
     sub: 'APIs · Streams · Events',
     desc: 'Full-stack, one language',
-    rx: 0.63,
-    ry: 0.25,
+    rx: 0.58,
+    ry: 0.28,
   },
   {
     id: 'tailwind',
@@ -43,8 +43,8 @@ const SKILL_DATA = [
     orbit: 'TAILWIND',
     sub: 'CSS · Utility · Responsive',
     desc: 'Design without leaving JSX',
-    rx: 0.88,
-    ry: 0.25,
+    rx: 0.83,
+    ry: 0.15,
   },
   {
     id: 'vite',
@@ -52,8 +52,8 @@ const SKILL_DATA = [
     orbit: 'VITE',
     sub: 'Build · HMR · Plugins',
     desc: 'Dev server that stays fast',
-    rx: 0.12,
-    ry: 0.75,
+    rx: 0.13,
+    ry: 0.58,
   },
   {
     id: 'playwright',
@@ -61,8 +61,8 @@ const SKILL_DATA = [
     orbit: 'PLAYWRIGHT',
     sub: 'E2E · Testing · Browsers',
     desc: 'Tests that catch real bugs',
-    rx: 0.37,
-    ry: 0.75,
+    rx: 0.72,
+    ry: 0.78,
   },
   {
     id: 'postgres',
@@ -70,8 +70,8 @@ const SKILL_DATA = [
     orbit: 'POSTGRES',
     sub: 'SQL · Indexes · Relations',
     desc: 'Reliable relational storage',
-    rx: 0.63,
-    ry: 0.75,
+    rx: 0.47,
+    ry: 0.7,
   },
   {
     id: 'docker',
@@ -79,8 +79,8 @@ const SKILL_DATA = [
     orbit: 'DOCKER',
     sub: 'Containers · Images · Compose',
     desc: 'Same env, every machine',
-    rx: 0.88,
-    ry: 0.75,
+    rx: 0.84,
+    ry: 0.52,
   },
 ] as const
 
@@ -626,7 +626,10 @@ export function ConstellationCanvas() {
     const themeObserver = new MutationObserver(() => {
       theme = readTheme()
     })
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
 
     function activate(node: SkillNode) {
       if (activeNode && activeNode !== node) {
@@ -724,7 +727,9 @@ export function ConstellationCanvas() {
         const dy = my - n.y
         n.hovered = Math.sqrt(dx * dx + dy * dy) < HIT_RADIUS
       })
-      canvas!.style.cursor = nodes.some((n) => n.hovered) ? 'pointer' : 'default'
+      const anyHovered = nodes.some((n) => n.hovered)
+      canvas!.style.cursor = anyHovered ? 'pointer' : 'default'
+      canvas!.dataset.cursorActive = anyHovered ? 'true' : ''
     }
 
     function onClick(e: MouseEvent) {
@@ -750,9 +755,14 @@ export function ConstellationCanvas() {
       }
     }
 
+    function onDocumentClick(e: MouseEvent) {
+      if (!canvas!.contains(e.target as Node) && activeNode) deactivate()
+    }
+
     canvas.addEventListener('mousemove', onMouseMove)
     canvas.addEventListener('click', onClick)
     canvas.addEventListener('touchend', onTouchEnd, { passive: false })
+    document.addEventListener('click', onDocumentClick)
 
     return () => {
       cancelAnimationFrame(raf)
@@ -761,6 +771,7 @@ export function ConstellationCanvas() {
       canvas.removeEventListener('mousemove', onMouseMove)
       canvas.removeEventListener('click', onClick)
       canvas.removeEventListener('touchend', onTouchEnd)
+      document.removeEventListener('click', onDocumentClick)
       timers.forEach(clearTimeout)
     }
   }, [])
