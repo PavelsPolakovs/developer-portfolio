@@ -6,9 +6,9 @@ const INTERACTIVE = 'a, button, [role="button"], input, textarea, select, label'
 const ORBIT_HIT_R = 14
 
 const SHADOW_IDLE =
-  'drop-shadow(0 0 3px rgba(0,0,0,0.85)) drop-shadow(0 0 6px rgba(255,255,255,0.75))'
+  'drop-shadow(0 0 2px rgba(0,0,0,0.55)) drop-shadow(0 0 3px rgba(255,255,255,0.4))'
 const SHADOW_HOVER =
-  'drop-shadow(0 0 4px rgba(0,0,0,0.9)) drop-shadow(0 0 8px rgba(255,255,255,0.85))'
+  'drop-shadow(0 0 3px rgba(0,0,0,0.6)) drop-shadow(0 0 5px rgba(255,255,255,0.5))'
 
 function findInteractiveNearby(cx: number, cy: number): Element | null {
   const r = ORBIT_HIT_R
@@ -147,7 +147,7 @@ export function CustomCursor() {
             ? { animation: 'var(--animate-nucleus-dim)' }
             : {
                 transform: 'translate(-50%, -50%)',
-                background: 'var(--accent)',
+                background: 'var(--cursor-idle)',
               }
         }
       />
@@ -162,7 +162,7 @@ export function CustomCursor() {
                 animation: 'var(--animate-orbit-fast), var(--animate-orbit-flash)',
               }
             : {
-                borderColor: 'color-mix(in oklab, var(--accent) 80%, transparent)',
+                borderColor: 'color-mix(in oklab, var(--cursor-idle) 70%, transparent)',
                 animation: 'var(--animate-orbit-slow)',
               }
         }
@@ -177,7 +177,7 @@ export function CustomCursor() {
                   animation: 'var(--animate-electron-flash)',
                 }
               : {
-                  background: 'color-mix(in oklab, var(--accent) 85%, transparent)',
+                  background: 'color-mix(in oklab, var(--cursor-idle) 75%, transparent)',
                 }
           }
         />
