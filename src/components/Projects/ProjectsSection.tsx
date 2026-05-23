@@ -1,5 +1,7 @@
+import { motion } from 'framer-motion'
 import { ProjectCard } from './ProjectCard'
 import type { ProjectCardProps } from './ProjectCard'
+import { fadeInUp, staggerContainerDelayed } from '../../lib/animation-variants'
 
 const PROJECTS: ProjectCardProps[] = [
   {
@@ -24,20 +26,31 @@ const PROJECTS: ProjectCardProps[] = [
 
 export function ProjectsSection() {
   return (
-    <section id="projects" data-testid="projects-section" className="border-border border-t">
-      <div className="mx-auto max-w-5xl px-6 pt-16">
+    <motion.section
+      id="projects"
+      data-testid="projects-section"
+      className="border-border border-t"
+      variants={staggerContainerDelayed}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.15 }}
+    >
+      <motion.div className="mx-auto max-w-5xl px-6 pt-16" variants={fadeInUp}>
         <h2 className="text-fg text-3xl font-bold tracking-tight sm:text-4xl">Projects</h2>
         <p className="text-muted mt-2 text-sm">Hover a card to explore — tap on mobile.</p>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
         className="mx-auto mt-8 grid max-w-5xl gap-6 px-6 pb-24 sm:grid-cols-2 sm:pb-32"
         data-testid="projects-grid"
+        variants={staggerContainerDelayed}
       >
         {PROJECTS.map((project) => (
-          <ProjectCard key={project.title} {...project} />
+          <motion.div key={project.title} variants={fadeInUp}>
+            <ProjectCard {...project} />
+          </motion.div>
         ))}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   )
 }

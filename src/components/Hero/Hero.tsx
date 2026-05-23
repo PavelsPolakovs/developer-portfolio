@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { HeroCanvas } from './HeroCanvas'
 import { HeroCard } from './HeroCard'
 import { TechTicker } from './TechTicker'
+import { fadeInUp, staggerContainer } from '../../lib/animation-variants'
 
 function Avatar() {
   return (
@@ -11,8 +13,6 @@ function Avatar() {
     </div>
   )
 }
-
-const DELAY = (n: number) => ({ style: { animationDelay: `${n * 80}ms` } })
 
 export function Hero() {
   const [overlayVisible, setOverlayVisible] = useState(false)
@@ -67,36 +67,29 @@ export function Hero() {
       />
 
       <div className="relative mx-auto max-w-6xl px-6 pt-28 pb-0 sm:pt-32">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-16">
+        <motion.div
+          className="flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-16"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           {/* ── Left column ── */}
           <div className="flex flex-1 flex-col gap-6">
-            <div
-              className="opacity-0"
-              style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(0).style }}
-            >
+            <motion.div variants={fadeInUp}>
               <Avatar />
-            </div>
+            </motion.div>
 
-            <div
-              className="opacity-0"
-              style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(1).style }}
-            >
+            <motion.div variants={fadeInUp}>
               <h1 className="text-fg text-4xl font-bold tracking-tight sm:text-5xl">Lex Polaris</h1>
               <p className="text-accent mt-1 text-lg font-medium">Full-Stack Engineer</p>
-            </div>
+            </motion.div>
 
-            <p
-              className="text-muted max-w-md text-base leading-relaxed opacity-0"
-              style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(2).style }}
-            >
+            <motion.p className="text-muted max-w-md text-base leading-relaxed" variants={fadeInUp}>
               Ten years shipping calm, fast web products in tight teams — TypeScript on both sides
               of the wire. Bias toward boring technology, small PRs, and tools that feel inevitable.
-            </p>
+            </motion.p>
 
-            <div
-              className="flex flex-wrap gap-3 opacity-0"
-              style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(3).style }}
-            >
+            <motion.div className="flex flex-wrap gap-3" variants={fadeInUp}>
               <a
                 href="#projects"
                 className="bg-accent text-accent-fg rounded-lg px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 active:scale-95"
@@ -117,13 +110,13 @@ export function Hero() {
               >
                 GitHub ↗
               </a>
-            </div>
+            </motion.div>
           </div>
 
           {/* ── Right column ── */}
-          <div
-            className="flex flex-1 items-center justify-center opacity-0 lg:justify-end"
-            style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(4).style }}
+          <motion.div
+            className="flex flex-1 items-center justify-center lg:justify-end"
+            variants={fadeInUp}
           >
             <div
               data-testid="animation-wrapper"
@@ -144,17 +137,20 @@ export function Hero() {
                 <HeroCard />
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* ── Tech ticker ── */}
-      <div
-        className="mt-12 opacity-0"
-        style={{ animation: 'var(--animate-fade-in-up)', ...DELAY(5).style }}
+      <motion.div
+        className="mt-12"
+        variants={fadeInUp}
+        initial="hidden"
+        animate="visible"
+        transition={{ duration: 0.45, ease: 'easeOut', delay: 0.5 }}
       >
         <TechTicker />
-      </div>
+      </motion.div>
     </section>
   )
 }
