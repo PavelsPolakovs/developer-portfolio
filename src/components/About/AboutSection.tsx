@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { TimelineItem, type TimelineItemData } from './TimelineItem'
+import { fadeInUp, staggerContainerDelayed } from '../../lib/animation-variants'
 
 const STATS = [
   { value: '4+', label: 'Years experience' },
@@ -157,36 +159,45 @@ export function AboutSection() {
 
   return (
     <>
-      <section
+      <motion.section
         id="about"
         data-testid="about-section"
         className="border-border bg-surface/40 border-t px-6 py-24 sm:py-32"
+        variants={staggerContainerDelayed}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
       >
         <div className="mx-auto max-w-6xl">
           {/* Header */}
-          <h2 className="text-fg text-3xl font-bold tracking-tight sm:text-4xl">About</h2>
-          <p className="text-muted mt-4 max-w-2xl text-base leading-relaxed">
-            Ten years of shipping in tight teams, mostly TypeScript on both sides of the wire.
-            Comfortable in the design tool and the terminal. Bias toward boring technology, fast
-            feedback loops and writing the smallest thing that could possibly work.
-          </p>
+          <motion.div variants={fadeInUp}>
+            <h2 className="text-fg text-3xl font-bold tracking-tight sm:text-4xl">About</h2>
+            <p className="text-muted mt-4 max-w-2xl text-base leading-relaxed">
+              Ten years of shipping in tight teams, mostly TypeScript on both sides of the wire.
+              Comfortable in the design tool and the terminal. Bias toward boring technology, fast
+              feedback loops and writing the smallest thing that could possibly work.
+            </p>
+          </motion.div>
 
           {/* Stats */}
-          <div className="mt-10 flex flex-wrap items-end gap-x-10 gap-y-4">
+          <motion.div
+            className="mt-10 flex flex-wrap items-end gap-x-10 gap-y-4"
+            variants={staggerContainerDelayed}
+          >
             {STATS.filter((s) => !s.full).map((stat) => (
-              <div key={stat.label} className="flex flex-col">
+              <motion.div key={stat.label} className="flex flex-col" variants={fadeInUp}>
                 <span className="text-accent font-mono text-3xl font-bold">{stat.value}</span>
                 <span className="text-muted mt-0.5 text-xs tracking-wide">{stat.label}</span>
-              </div>
+              </motion.div>
             ))}
             <div className="w-full" />
             {STATS.filter((s) => s.full).map((stat) => (
-              <div key={stat.label} className="flex flex-col">
+              <motion.div key={stat.label} className="flex flex-col" variants={fadeInUp}>
                 <span className="text-accent font-mono text-3xl font-bold">{stat.value}</span>
                 <span className="text-muted mt-0.5 text-xs tracking-wide">{stat.label}</span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Timeline */}
           <div className="mt-16 ml-4 sm:ml-16">
@@ -197,20 +208,25 @@ export function AboutSection() {
                 style={{ background: 'color-mix(in oklab, var(--border) 80%, transparent)' }}
               />
 
-              <div className="flex flex-col gap-10" data-testid="timeline">
+              <motion.div
+                className="flex flex-col gap-10"
+                data-testid="timeline"
+                variants={staggerContainerDelayed}
+              >
                 {TIMELINE_ITEMS.map((item, i) => (
-                  <TimelineItem
-                    key={item.year}
-                    {...item}
-                    active={activeIndex === i}
-                    onClick={() => handleItemClick(i)}
-                  />
+                  <motion.div key={item.year} variants={fadeInUp}>
+                    <TimelineItem
+                      {...item}
+                      active={activeIndex === i}
+                      onClick={() => handleItemClick(i)}
+                    />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {modalItem && <Modal item={modalItem} onClose={closeModal} />}
     </>
