@@ -97,6 +97,8 @@ function Modal({ item, onClose }: ModalProps) {
   return (
     <div
       data-testid="modal-backdrop"
+      role="button"
+      aria-label="Close modal"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
