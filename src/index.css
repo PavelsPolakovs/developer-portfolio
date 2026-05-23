@@ -48,7 +48,7 @@
     --accent-fg: #0d1311;
     --border: #2a312d;
     --ring: #5cb88a;
-    --cursor-idle: var(--accent);
+    --cursor-idle: #5cb88a;
   }
 
   .theme-nord {
@@ -59,7 +59,7 @@
     --accent: #88c0d0;
     --accent-fg: #2e3440;
     --border: #434c5e;
-    --cursor-idle: var(--accent);
+    --cursor-idle: #88c0d0;
     --ring: #88c0d0;
   }
 

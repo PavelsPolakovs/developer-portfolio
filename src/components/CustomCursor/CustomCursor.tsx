@@ -129,6 +129,7 @@ export function CustomCursor() {
         transition: 'opacity 0.3s',
         willChange: 'transform',
         filter: active ? SHADOW_HOVER : SHADOW_IDLE,
+        ['--accent' as string]: 'var(--cursor-idle)',
       }}
     >
       {/* Pulse wave — only visible in hover state */}
