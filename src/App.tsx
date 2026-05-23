@@ -1,3 +1,4 @@
+import { AboutSection } from './components/About'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 
@@ -34,16 +35,7 @@ function App() {
       <main className="bg-bg text-fg">
         <Hero />
 
-        <section id="about" className="border-border bg-surface/40 border-t px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-tight">About</h2>
-            <p className="text-muted mt-6 text-base leading-relaxed">
-              Ten years of shipping in tight teams, mostly TypeScript on both sides of the wire.
-              Comfortable in the design tool and the terminal. Bias toward boring technology, fast
-              feedback loops and writing the smallest thing that could possibly work.
-            </p>
-          </div>
-        </section>
+        <AboutSection />
 
         <section id="skills" className="border-border border-t px-6 py-24 sm:py-32">
           <div className="mx-auto max-w-3xl">

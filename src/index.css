@@ -15,6 +15,14 @@
   --animate-ticker: ticker-scroll 28s linear infinite;
   --animate-fade-in-up: fade-in-up 0.6s ease-out both;
   --animate-shimmer-glare: shimmer-glare 4s ease-in-out infinite;
+
+  --animate-orbit-slow: orbit-spin-slow 6s linear infinite;
+  --animate-orbit-fast: orbit-spin-fast 3s linear infinite;
+  --animate-orbit-flash: orbit-flash 2.4s ease-out infinite;
+  --animate-nucleus-dim: nucleus-dim 2.4s ease-out infinite;
+  --animate-wave-expand: wave-expand 2.4s ease-out infinite;
+  --animate-electron-flash: electron-flash 2.4s ease-out infinite;
+  --animate-typewriter-cursor: typewriter-cursor 0.8s step-end infinite;
 }
 
 @layer base {
@@ -138,5 +146,135 @@
     box-shadow:
       0 0 0 6px color-mix(in oklab, var(--accent) 0%, transparent),
       0 0 22px 6px color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+}
+
+@keyframes orbit-spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-spin-fast {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-flash {
+  0% {
+    border-color: color-mix(in oklab, var(--accent) 20%, transparent);
+    box-shadow: none;
+  }
+  38% {
+    border-color: color-mix(in oklab, var(--accent) 20%, transparent);
+    box-shadow: none;
+  }
+  43% {
+    border-color: color-mix(in oklab, var(--accent) 93%, transparent);
+    box-shadow: 0 0 16px color-mix(in oklab, var(--accent) 40%, transparent);
+  }
+  65% {
+    border-color: color-mix(in oklab, var(--accent) 27%, transparent);
+    box-shadow: none;
+  }
+  100% {
+    border-color: color-mix(in oklab, var(--accent) 20%, transparent);
+    box-shadow: none;
+  }
+}
+
+@keyframes nucleus-dim {
+  0% {
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  25% {
+    background: var(--accent);
+    box-shadow: 0 0 16px var(--accent);
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  55% {
+    background: color-mix(in oklab, var(--accent) 15%, var(--bg));
+    box-shadow: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    background: color-mix(in oklab, var(--accent) 15%, var(--bg));
+    box-shadow: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes wave-expand {
+  0% {
+    width: 9px;
+    height: 9px;
+    opacity: 0.9;
+    border-color: color-mix(in oklab, var(--accent) 80%, transparent);
+  }
+  40% {
+    width: 52px;
+    height: 52px;
+    opacity: 0.7;
+    border-color: var(--accent);
+  }
+  85% {
+    width: 140px;
+    height: 140px;
+    opacity: 0;
+    border-color: color-mix(in oklab, var(--accent) 7%, transparent);
+  }
+  86% {
+    width: 9px;
+    height: 9px;
+    opacity: 0;
+  }
+  100% {
+    width: 9px;
+    height: 9px;
+    opacity: 0;
+  }
+}
+
+@keyframes electron-flash {
+  0% {
+    background: color-mix(in oklab, var(--accent) 40%, transparent);
+    box-shadow: none;
+  }
+  43% {
+    background: color-mix(in oklab, var(--accent) 40%, transparent);
+    box-shadow: none;
+  }
+  48% {
+    background: var(--accent);
+    box-shadow:
+      0 0 14px var(--accent),
+      0 0 30px color-mix(in oklab, var(--accent) 27%, transparent);
+  }
+  70% {
+    background: color-mix(in oklab, var(--accent) 53%, transparent);
+    box-shadow: none;
+  }
+  100% {
+    background: color-mix(in oklab, var(--accent) 40%, transparent);
+    box-shadow: none;
+  }
+}
+
+@keyframes typewriter-cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
   }
 }
