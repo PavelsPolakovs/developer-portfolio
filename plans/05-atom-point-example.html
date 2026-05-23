@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeline Atom — Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --accent: #22c55e;
+    --text: #f1f5f9;
+    --muted: #9ca3af;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'Syne', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+  }
+
+  .demo {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #374151;
+    margin-bottom: 32px;
+  }
+
+  .tl-item {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .atom {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    overflow: visible;
+  }
+
+  .orbit {
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 1.5px solid #22c55e33;
+  }
+
+  .electron {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .nucleus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  .wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── INACTIVE ── */
+  .inactive .nucleus {
+    background: #22c55e55;
+  }
+
+  .inactive .orbit {
+    border-color: #22c55e22;
+    animation: orbit-spin-slow 6s linear infinite;
+  }
+
+  .inactive .electron {
+    background: #22c55e44;
+  }
+
+  @keyframes orbit-spin-slow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ── ACTIVE ── */
+
+  /* ядро: вспыхивает → темнеет но остаётся видимым */
+  .active .nucleus {
+    animation: nucleus-dim 2.4s ease-out infinite;
+  }
+
+  @keyframes nucleus-dim {
+    0%   { background: var(--accent); box-shadow: 0 0 10px var(--accent); transform: translate(-50%, -50%) scale(1); }
+    25%  { background: var(--accent); box-shadow: 0 0 16px var(--accent); transform: translate(-50%, -50%) scale(1.2); }
+    55%  { background: #1a3a28; box-shadow: none; transform: translate(-50%, -50%) scale(1); }
+    100% { background: #1a3a28; box-shadow: none; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  /* волна: стартует от ядра, уходит далеко за орбиту */
+  .active .wave {
+    animation: wave-expand 2.4s ease-out infinite;
+  }
+
+  @keyframes wave-expand {
+    0%   { width: 9px;   height: 9px;   opacity: 0.9; border-color: #22c55ecc; }
+    40%  { width: 52px;  height: 52px;  opacity: 0.7; border-color: var(--accent); }
+    85%  { width: 140px; height: 140px; opacity: 0;   border-color: #22c55e11; }
+    86%  { width: 9px;   height: 9px;   opacity: 0; }
+    100% { width: 9px;   height: 9px;   opacity: 0; }
+  }
+
+  /* орбита вспыхивает когда волна её достигает */
+  .active .orbit {
+    animation: orbit-spin-fast 3s linear infinite, orbit-flash 2.4s ease-out infinite;
+  }
+
+  @keyframes orbit-spin-fast {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes orbit-flash {
+    0%   { border-color: #22c55e33; box-shadow: none; }
+    38%  { border-color: #22c55e33; box-shadow: none; }
+    43%  { border-color: #22c55eee; box-shadow: 0 0 16px #22c55e66; }
+    65%  { border-color: #22c55e44; box-shadow: none; }
+    100% { border-color: #22c55e33; box-shadow: none; }
+  }
+
+  /* электрон вспыхивает чуть позже орбиты */
+  .active .electron {
+    background: #22c55e99;
+    animation: electron-flash 2.4s ease-out infinite;
+  }
+
+  @keyframes electron-flash {
+    0%   { background: #22c55e66; box-shadow: none; }
+    43%  { background: #22c55e66; box-shadow: none; }
+    48%  { background: var(--accent); box-shadow: 0 0 14px var(--accent), 0 0 30px #22c55e44; }
+    70%  { background: #22c55e88; box-shadow: none; }
+    100% { background: #22c55e66; box-shadow: none; }
+  }
+
+  /* ── TEXT ── */
+  .tl-year  { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; margin-bottom: 4px; }
+  .tl-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .tl-desc  { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  .active .tl-year  { color: var(--accent); }
+  .active .tl-title { color: var(--text); }
+  .active .tl-desc  { color: var(--muted); }
+
+  .inactive .tl-year  { color: #22c55e44; }
+  .inactive .tl-title { color: #4b5563; }
+  .inactive .tl-desc  { color: #374151; }
+</style>
+</head>
+<body>
+
+<div class="demo">
+
+  <div>
+    <div class="label">// active state</div>
+    <div class="tl-item active">
+      <div class="atom">
+        <div class="wave"></div>
+        <div class="nucleus"></div>
+        <div class="orbit">
+          <div class="electron"></div>
+        </div>
+      </div>
+      <div class="tl-text">
+        <div class="tl-year">2026</div>
+        <div class="tl-title">Это портфолио</div>
+        <div class="tl-desc">Собрал всё лучшее в одном месте</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="label">// inactive state</div>
+    <div class="tl-item inactive">
+      <div class="atom">
+        <div class="nucleus"></div>
+        <div class="orbit">
+          <div class="electron"></div>
+        </div>
+      </div>
+      <div class="tl-text">
+        <div class="tl-year">2024</div>
+        <div class="tl-title">Claude Code</div>
+        <div class="tl-desc">AI стал частью рабочего процесса</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
