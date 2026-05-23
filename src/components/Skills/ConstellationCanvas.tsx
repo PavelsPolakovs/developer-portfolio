@@ -623,7 +623,10 @@ export function ConstellationCanvas() {
     window.addEventListener('resize', resize)
 
     let theme = readTheme()
-    let themeFrame = 0
+    const themeObserver = new MutationObserver(() => {
+      theme = readTheme()
+    })
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
     function activate(node: SkillNode) {
       if (activeNode && activeNode !== node) {
@@ -655,9 +658,6 @@ export function ConstellationCanvas() {
     function draw() {
       raf = requestAnimationFrame(draw)
       if (!canvas || !ctx) return
-      if (themeFrame % 60 === 0) theme = readTheme()
-      themeFrame++
-
       ctx.fillStyle = theme.bg
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -756,6 +756,7 @@ export function ConstellationCanvas() {
 
     return () => {
       cancelAnimationFrame(raf)
+      themeObserver.disconnect()
       window.removeEventListener('resize', resize)
       canvas.removeEventListener('mousemove', onMouseMove)
       canvas.removeEventListener('click', onClick)
