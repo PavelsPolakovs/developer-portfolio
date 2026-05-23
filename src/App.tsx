@@ -2,17 +2,7 @@ import { AboutSection } from './components/About'
 import { CustomCursor } from './components/CustomCursor'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
-
-const SKILLS = [
-  'TypeScript',
-  'React',
-  'Node.js',
-  'Tailwind CSS',
-  'Vite',
-  'Playwright',
-  'PostgreSQL',
-  'Docker',
-]
+import { SkillsSection } from './components/Skills'
 
 const PROJECTS = [
   {
@@ -39,21 +29,7 @@ function App() {
 
         <AboutSection />
 
-        <section id="skills" className="border-border border-t px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-3xl font-semibold tracking-tight">Skills</h2>
-            <ul className="mt-8 flex flex-wrap gap-2">
-              {SKILLS.map((s) => (
-                <li
-                  key={s}
-                  className="bg-surface text-fg ring-border rounded-full px-3 py-1 text-sm ring-1"
-                >
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+        <SkillsSection />
 
         <section id="projects" className="border-border bg-surface/40 border-t px-6 py-24 sm:py-32">
           <div className="mx-auto max-w-5xl">
