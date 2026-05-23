@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 
 type CursorState = 'idle' | 'hover'
 
-const INTERACTIVE = 'a, button, [role="button"], input, textarea, select, label'
+const INTERACTIVE =
+  'a, button, [role="button"], input, textarea, select, label, [data-cursor-active="true"]'
 const ORBIT_HIT_R = 14
 
 const SHADOW_IDLE =
