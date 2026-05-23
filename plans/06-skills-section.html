@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Node — Финальная версия</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #080a0f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  canvas { display: block; cursor: pointer; }
+  .hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #2d3748;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hint" id="hint">Click the star</div>
+
+<script>
+document.fonts.ready.then(() => {
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const hint   = document.getElementById('hint');
+
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const cx = canvas.width  / 2;
+const cy = canvas.height / 2;
+
+let mouse    = { x: cx, y: cy };
+let hovered  = false;
+let active   = false;
+let t        = 0;
+let comet    = null;
+
+const TITLE = 'React';
+const SUB   = 'UI · Components · Hooks';
+const DESC  = 'Core of every project';
+
+let titleBright = new Array(TITLE.length).fill(0);
+let subBright   = new Array(SUB.length).fill(0);
+let descBright  = new Array(DESC.length).fill(0);
+
+const particles = Array.from({ length: 60 }, () => ({
+  angle:   Math.random() * Math.PI * 2,
+  radius:  70 + Math.random() * 110,
+  speed:   (0.0003 + Math.random() * 0.0005) * (Math.random() > 0.5 ? 1 : -1),
+  size:    0.5 + Math.random() * 1.5,
+  opacity: 0.1 + Math.random() * 0.4,
+}));
+
+const rays = Array.from({ length: 6 }, (_, i) => ({
+  angle:  (i / 6) * Math.PI * 2 + Math.PI / 12,
+  length: 80 + Math.random() * 40,
+}));
+
+let pulseT       = 0;
+let isPulsing    = false;
+let wasHovered   = false;
+let orbitOpacity = 1.0;
+
+const TEXT_Y   = cy + 80;
+const LINE_GAP = 22;
+
+let titleMeasures = null;
+let subMeasures   = null;
+let descMeasures  = null;
+
+function measureLine(text, font) {
+  ctx.save();
+  ctx.font = font;
+  const total = ctx.measureText(text).width;
+  let ox = cx - total / 2;
+  const chars = [];
+  for (let i = 0; i < text.length; i++) {
+    const w = ctx.measureText(text[i]).width;
+    chars.push({ ch: text[i], x: ox + w / 2, w });
+    ox += w;
+  }
+  ctx.restore();
+  return chars;
+}
+
+function ensureMeasures() {
+  if (titleMeasures) return;
+  titleMeasures = measureLine(TITLE, "700 26px 'Syne', sans-serif");
+  subMeasures   = measureLine(SUB,   "400 11px 'JetBrains Mono', monospace");
+  descMeasures  = measureLine(DESC,  "300 11px 'JetBrains Mono', monospace");
+}
+
+function launchComet() {
+  ensureMeasures();
+  const allX = [...titleMeasures, ...subMeasures, ...descMeasures].map(c => c.x);
+  const minX = Math.min(...allX) - 40;
+  const maxX = Math.max(...allX) + 40;
+  comet = { x: minX, y: TEXT_Y - 10, xEnd: maxX, speed: (maxX - minX) / 55, tail: [], done: false };
+}
+
+function updateComet() {
+  if (!comet || comet.done) return;
+  comet.tail.unshift({ x: comet.x, y: comet.y });
+  if (comet.tail.length > 28) comet.tail.pop();
+  comet.x += comet.speed;
+  const RADIUS = 38;
+  function illuminateLine(measures, bright) {
+    measures.forEach((m, i) => {
+      [TEXT_Y, TEXT_Y + LINE_GAP, TEXT_Y + LINE_GAP * 2].forEach(ly => {
+        const dx = comet.x - m.x;
+        const dy = comet.y - ly;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if (d < RADIUS) bright[i] = Math.min(1, bright[i] + (1 - d / RADIUS) * 1.4);
+      });
+    });
+  }
+  illuminateLine(titleMeasures, titleBright);
+  illuminateLine(subMeasures,   subBright);
+  illuminateLine(descMeasures,  descBright);
+  if (comet.x > comet.xEnd) { comet.done = true; comet = null; }
+}
+
+function decayBrightness() {
+  if (!active) return;
+  const SETTLED = { title: 0.95, sub: 0.75, desc: 0.55 };
+  const decay   = 0.018;
+  titleBright = titleBright.map(b => b > SETTLED.title ? Math.max(SETTLED.title, b - decay) : b);
+  subBright   = subBright.map  (b => b > SETTLED.sub   ? Math.max(SETTLED.sub,   b - decay) : b);
+  descBright  = descBright.map (b => b > SETTLED.desc  ? Math.max(SETTLED.desc,  b - decay) : b);
+}
+
+let fallingLetters = [];
+let isFalling = false;
+
+function launchFall() {
+  ensureMeasures();
+  fallingLetters = [];
+  isFalling = true;
+  const lines = [
+    { measures: titleMeasures, bright: titleBright, brightArr: 'title', y: TEXT_Y,              font: "700 26px 'Syne', sans-serif"         },
+    { measures: subMeasures,   bright: subBright,   brightArr: 'sub',   y: TEXT_Y + LINE_GAP,   font: "400 11px 'JetBrains Mono', monospace" },
+    { measures: descMeasures,  bright: descBright,  brightArr: 'desc',  y: TEXT_Y + LINE_GAP*2, font: "300 11px 'JetBrains Mono', monospace" },
+  ];
+  lines.forEach(line => {
+    line.measures.forEach((m, i) => {
+      const startOpacity = line.bright[i];
+      if (startOpacity < 0.01) return;
+      fallingLetters.push({
+        ch: m.ch, x: m.x - m.w / 2, y: line.y,
+        vy: 1.2 + Math.random() * 2.5,
+        delay: Math.floor(Math.random() * 18),
+        opacity: startOpacity,
+        brightKey: line.brightArr, idx: i,
+        font: line.font, started: false,
+      });
+    });
+  });
+}
+
+function updateFall() {
+  if (!isFalling) return;
+  fallingLetters.forEach(l => {
+    if (l.delay > 0) { l.delay--; return; }
+    if (!l.started) {
+      l.started = true;
+      if (l.brightKey === 'title') titleBright[l.idx] = 0;
+      if (l.brightKey === 'sub')   subBright[l.idx]   = 0;
+      if (l.brightKey === 'desc')  descBright[l.idx]  = 0;
+    }
+    l.y += l.vy; l.vy += 0.18; l.opacity -= 0.012;
+  });
+  fallingLetters = fallingLetters.filter(l => l.opacity > 0.01);
+  if (fallingLetters.length === 0) isFalling = false;
+}
+
+function drawFallingLetters() {
+  fallingLetters.forEach(l => {
+    if (l.delay > 0) return;
+    ctx.save();
+    ctx.font = l.font;
+    ctx.textBaseline = 'middle';
+    const b = l.opacity;
+    ctx.fillStyle = `rgba(${Math.round(b*255)}, ${Math.round(255*Math.min(1,b*1.2))}, ${Math.round(136+(255-136)*Math.min(1,b*2))}, ${b})`;
+    ctx.fillText(l.ch, l.x, l.y);
+    ctx.restore();
+  });
+}
+
+function drawText() {
+  ensureMeasures();
+  function drawLine(measures, bright, font) {
+    ctx.save();
+    ctx.font = font;
+    ctx.textBaseline = 'middle';
+    measures.forEach((m, i) => {
+      const b = bright[i];
+      if (b < 0.01) return;
+      ctx.fillStyle = `rgba(${Math.round(b*255)}, ${Math.round(255*Math.min(1,b*1.2))}, ${Math.round(136+(255-136)*Math.min(1,b*2))}, ${b})`;
+      ctx.fillText(m.ch, m.x - m.w / 2, 0);
+    });
+    ctx.restore();
+  }
+  ctx.save(); ctx.translate(0, TEXT_Y);              drawLine(titleMeasures, titleBright, "700 26px 'Syne', sans-serif");          ctx.restore();
+  ctx.save(); ctx.translate(0, TEXT_Y + LINE_GAP);   drawLine(subMeasures,   subBright,   "400 11px 'JetBrains Mono', monospace"); ctx.restore();
+  ctx.save(); ctx.translate(0, TEXT_Y + LINE_GAP*2); drawLine(descMeasures,  descBright,  "300 11px 'JetBrains Mono', monospace"); ctx.restore();
+}
+
+function drawComet() {
+  if (!comet) return;
+  for (let i = 0; i < comet.tail.length; i++) {
+    const frac = 1 - i / comet.tail.length;
+    ctx.beginPath();
+    ctx.arc(comet.tail[i].x, comet.tail[i].y, frac * 3, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(180, 255, 220, ${frac * 0.9})`;
+    ctx.fill();
+  }
+  const g = ctx.createRadialGradient(comet.x, comet.y, 0, comet.x, comet.y, 14);
+  g.addColorStop(0, 'rgba(220, 255, 240, 0.95)');
+  g.addColorStop(0.4, 'rgba(0, 255, 136, 0.4)');
+  g.addColorStop(1, 'transparent');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(comet.x, comet.y, 14, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawStar() {
+  const isActive  = active;
+  const isHovered = hovered;
+
+  // BG glow
+  const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, isActive ? 220 : 140);
+  bgGlow.addColorStop(0, `rgba(0, 255, 136, ${isActive ? 0.06 : isHovered ? 0.04 : 0.015})`);
+  bgGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = bgGlow;
+  ctx.beginPath(); ctx.arc(cx, cy, 300, 0, Math.PI * 2); ctx.fill();
+
+  // Pulse ring
+  if (isPulsing) {
+    const pr = (1 - Math.pow(1 - pulseT, 3)) * 200;
+    ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(0, 255, 136, ${(1 - pulseT) * 0.7})`;
+    ctx.lineWidth = 1.5; ctx.stroke();
+  }
+
+  // Particles
+  particles.forEach(p => {
+    p.angle += p.speed * (isActive ? 2 : isHovered ? 1.8 : 1);
+    const r  = isActive ? p.radius * 0.88 : p.radius;
+    const px = cx + Math.cos(p.angle) * r;
+    const py = cy + Math.sin(p.angle) * r;
+    const d  = Math.sqrt((px-cx)**2 + (py-cy)**2);
+    ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0, 255, 136, ${p.opacity * Math.max(0, 1 - d/200) * (isActive ? 1 : isHovered ? 0.8 : 0.5)})`;
+    ctx.fill();
+  });
+
+  // Rays
+  rays.forEach(ray => {
+    const a   = ray.angle + t * 0.3;
+    const len = isActive ? ray.length * 1.8 : isHovered ? ray.length * 1.4 : ray.length;
+    const r0  = isActive ? 30 : isHovered ? 26 : 20;
+    const x1 = cx + Math.cos(a) * r0, y1 = cy + Math.sin(a) * r0;
+    const x2 = cx + Math.cos(a) * len, y2 = cy + Math.sin(a) * len;
+    const g = ctx.createLinearGradient(x1, y1, x2, y2);
+    g.addColorStop(0, `rgba(0, 255, 136, ${isActive ? 0.6 : isHovered ? 0.4 : 0.15})`);
+    g.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = g; ctx.lineWidth = isActive ? 1.5 : 1; ctx.stroke();
+  });
+
+  // Dashed orbit ring
+  const rr = isActive ? 42 : isHovered ? 36 : 30;
+  ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+  ctx.strokeStyle = `rgba(0, 255, 136, ${isActive ? 0.45 : isHovered ? 0.3 : 0.1})`;
+  ctx.lineWidth = 1; ctx.setLineDash([3, 6]); ctx.lineDashOffset = -t * 20;
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Orbit text
+  if (orbitOpacity > 0.01) {
+    const LABEL      = 'REACT';
+    const charCount  = LABEL.length;
+    const angleStep  = (Math.PI * 2) / charCount;
+    const baseAngle  = -t * 0.8 - Math.PI / 2;
+    const PULSE_AMP  = 5;
+    const PULSE_FREQ = 2.5;
+    const pulse      = Math.sin(t * PULSE_FREQ) * PULSE_AMP;
+
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.textAlign    = 'center';
+    ctx.font = "600 9px 'JetBrains Mono', monospace";
+
+    for (let i = 0; i < charCount; i++) {
+      const a       = baseAngle + i * angleStep;
+      const ORBIT_R = rr + 14 + pulse;
+      const lx = cx + Math.cos(a) * ORBIT_R;
+      const ly = cy + Math.sin(a) * ORBIT_R;
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(a + Math.PI / 2);
+      ctx.fillStyle = `rgba(0, 255, 136, ${orbitOpacity * (isHovered ? 0.85 : 0.5)})`;
+      ctx.fillText(LABEL[i], 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // Core glow
+  const cr = isActive ? 32 : isHovered ? 26 : 20;
+  const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
+  cg.addColorStop(0,   `rgba(0, 255, 136, ${isActive ? 1 : isHovered ? 0.7 : 0.4})`);
+  cg.addColorStop(0.4, `rgba(0, 255, 136, ${isActive ? 0.35 : 0.1})`);
+  cg.addColorStop(1,   'transparent');
+  ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.fill();
+
+  // Core dot — fixed size, brightness flickers
+  const flicker = 0.5 + 0.5 * Math.sin(t * 3.5);
+  const coreR   = isActive ? 9 : isHovered ? 7 : 5;
+  const coreA   = isActive ? 1 : isHovered ? 0.9 : 0.4 + flicker * 0.5;
+  ctx.beginPath(); ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+  ctx.fillStyle = isActive ? `rgba(255,255,255,${coreA})` : `rgba(0,255,136,${coreA})`;
+  ctx.fill();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  t += 0.008;
+
+  if (hovered && !wasHovered) { isPulsing = true; pulseT = 0; }
+  wasHovered = hovered;
+  if (isPulsing) { pulseT += 0.025; if (pulseT >= 1) isPulsing = false; }
+
+  orbitOpacity = active
+    ? Math.max(0, orbitOpacity - 0.04)
+    : Math.min(1, orbitOpacity + 0.03);
+
+  updateComet();
+  decayBrightness();
+  updateFall();
+  drawStar();
+  drawComet();
+  drawText();
+  drawFallingLetters();
+
+  requestAnimationFrame(draw);
+}
+
+canvas.addEventListener('mousemove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  const dx = mouse.x - cx, dy = mouse.y - cy;
+  hovered = Math.sqrt(dx*dx + dy*dy) < 60;
+  canvas.style.cursor = hovered ? 'pointer' : 'default';
+});
+
+canvas.addEventListener('click', e => {
+  const dx = e.clientX - cx, dy = e.clientY - cy;
+  const onStar = Math.sqrt(dx*dx + dy*dy) < 60;
+  if (onStar && !active) {
+    active = true; isPulsing = true; pulseT = 0;
+    hint.style.opacity = '0';
+    setTimeout(launchComet, 300);
+  } else if (!onStar && active) {
+    active = false; comet = null;
+    launchFall();
+  }
+});
+
+window.addEventListener('resize', () => {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  titleMeasures = null;
+});
+
+draw();
+});
+</script>
+</body>
+</html>
